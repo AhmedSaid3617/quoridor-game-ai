@@ -74,3 +74,11 @@ class GameState:
             
             self.horizontal_edges[position.y][position.x] = True
             self.horizontal_edges[position.y][position.x + 1] = True
+
+    def __copy__(self):
+        new_state = GameState()
+        new_state.player_one = self.player_one.__copy__()
+        new_state.player_two = self.player_two.__copy__()
+        new_state.vertical_edges = [row[:] for row in self.vertical_edges]
+        new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
+        return new_state

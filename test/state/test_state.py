@@ -226,3 +226,23 @@ class TestStateOperations(unittest.TestCase):
 
         self.assertEqual(pos1, pos2)
         self.assertIsNot(pos1, pos2)
+
+    def test_copy_game_state(self):
+        self.state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(2, 3))
+        self.state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(6, 7))
+        self.state.place_wall(GameState.Wall.VERTICAL, GameState.Position(1, 1))
+        self.state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(4, 4))
+
+        copied_state = self.state.__copy__()
+
+        self.assertEqual(copied_state.player_one, self.state.player_one)
+        self.assertEqual(copied_state.player_two, self.state.player_two)
+        self.assertEqual(copied_state.vertical_edges, self.state.vertical_edges)
+        self.assertEqual(copied_state.horizontal_edges, self.state.horizontal_edges)
+
+        # Ensure that modifying the copied state does not affect the original state
+        copied_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(0, 0))
+        self.assertNotEqual(copied_state.player_one, self.state.player_one)
+
+        copied_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 2))
+        self.assertNotEqual(copied_state.vertical_edges, self.state.vertical_edges)
