@@ -10,6 +10,12 @@ class GameState:
 
         def __eq__(self, other):
             return self.x == other.x and self.y == other.y
+        
+        def __copy__(self):
+            return GameState.Position(self.x, self.y)
+
+        def __str__(self):
+            return f"({self.x}, {self.y})"
 
 
     class Player(Enum):
@@ -27,13 +33,13 @@ class GameState:
         self.player_two = self.Position(4,0)
 
         # vertical_edges[x][y] indicates if there is a vertical wall to the right of (x, y)
-        self.vertical_edges = [9 * [[False] * 8]]
+        self.vertical_edges = [[False] * 8 for _ in range(9)]
 
         # horizontal_edges[x][y] indicates if there is a horizontal wall below (x, y)
-        self.horizontal_edges = [8 * [[False] * 9]]
+        self.horizontal_edges = [[False] * 9 for _ in range(8)]
 
-    def place(self, player: Player, position: Position):
-        if position.x < 0 or position.x > 9 or position.y < 0 or position.y > 9:
+    def place_player(self, player: Player, position: Position):
+        if position.x < 0 or position.x >= 9 or position.y < 0 or position.y >= 9:
             raise ValueError("Invalid position: out of bounds")
 
         if player == self.Player.PLAYER_ONE:
@@ -48,23 +54,23 @@ class GameState:
             
             self.player_two = position
 
-    def place(self, wall: Wall, position: Position):
+    def place_wall(self, wall: Wall, position: Position):
         if wall == self.Wall.VERTICAL:
-            if position.x < 0 or position.x > 8 or position.y <= 0 or position.y > 8:
+            if position.x < 0 or position.x > 7 or position.y < 0 or position.y > 7:
                 raise ValueError("Invalid position for vertical wall")
             
-            if self.vertical_edges[position.x][position.y] or self.vertical_edges[position.x][position.y - 1]:
+            if self.vertical_edges[position.y][position.x] or self.vertical_edges[position.y + 1][position.x]:
                 raise ValueError("Invalid position: a vertical wall blocks placing here")
             
-            self.vertical_edges[position.x][position.y] = True
-            self.vertical_edges[position.x][position.y - 1] = True
+            self.vertical_edges[position.y][position.x] = True
+            self.vertical_edges[position.y + 1][position.x] = True
 
         elif wall == self.Wall.HORIZONTAL:
-            if position.x < 0 or position.x >= 8 or position.y < 0 or position.y > 7:
+            if position.x < 0 or position.x >= 7 or position.y < 0 or position.y > 7:
                 raise ValueError("Invalid position for horizontal wall")
             
-            if self.horizontal_edges[position.x][position.y] or self.horizontal_edges[position.x + 1][position.y]:
+            if self.horizontal_edges[position.y][position.x] or self.horizontal_edges[position.y][position.x + 1]:
                 raise ValueError("Invalid position: a horizontal wall blocks placing here")
             
-            self.horizontal_edges[position.x][position.y] = True
-            self.horizontal_edges[position.x + 1][position.y] = True
+            self.horizontal_edges[position.y][position.x] = True
+            self.horizontal_edges[position.y][position.x + 1] = True
