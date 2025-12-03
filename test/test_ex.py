@@ -1,6 +1,6 @@
 def test_basic_operations():
     # basic arithmetic
-    assert 2 + 2 == 5
+    assert 2 + 2 == 4
     # string behavior
     assert "abc".upper() == "ABC"
     # sequence reversal
