@@ -1,1 +1,1 @@
-Quoridor Arena Game
+Quoridor Game
