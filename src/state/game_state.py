@@ -24,13 +24,15 @@ class GameState:
 
 
     class Wall(Enum):
-        VERTICAL = 1
-        HORIZONTAL = 2
+        VERTICAL = "VERTICAL"
+        HORIZONTAL = "HORIZONTAL"
 
 
     def __init__(self):
         self.player_one = self.Position(4,8)
         self.player_two = self.Position(4,0)
+        self.player_one_remaining_walls = 10
+        self.player_two_remaining_walls = 10
 
         # vertical_edges[x][y] indicates if there is a vertical wall to the right of (x, y)
         self.vertical_edges = [[False] * 8 for _ in range(9)]
