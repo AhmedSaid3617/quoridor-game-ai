@@ -19,6 +19,10 @@ class GameRules:
             RIGHT = "RIGHT"
             DOWN = "DOWN"
             LEFT = "LEFT"
+            NE = "NE"
+            SE = "SE"
+            SW = "SW"
+            NW = "NW"
             
         def __init__(self, movement: MovementType):
             self.movement = movement
@@ -44,49 +48,71 @@ class GameRules:
         self.game_state = game_state
 
     # TODO: implement special cases, hitting a player
-    def can_move_up(self, position: GameState.Position) -> bool:
+    def _can_move_up(self, position: GameState.Position) -> bool:
         if position.y == 0:
             return False
         if self.game_state.horizontal_edges[position.y - 1][position.x]:
             return False
         return True
     
-    def can_move_right(self, position: GameState.Position) -> bool:
+    def _can_move_right(self, position: GameState.Position) -> bool:
         if position.x == 8:
             return False
         if self.game_state.vertical_edges[position.y][position.x]:
             return False
         return True
 
-    def can_move_down(self, position: GameState.Position) -> bool:
+    def _can_move_down(self, position: GameState.Position) -> bool:
         if position.y == 8:
             return False
         if self.game_state.horizontal_edges[position.y][position.x]:
             return False
         return True
     
-    def can_move_left(self, position: GameState.Position) -> bool:
+    def _can_move_left(self, position: GameState.Position) -> bool:
         if position.x == 0:
             return False
         if self.game_state.vertical_edges[position.y][position.x - 1]:
             return False
         return True
     
-    def can_move_se(self, position: GameState.Position) -> bool:
+    def _can_move_se(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
     
-    def can_move_sw(self, position: GameState.Position) -> bool:
+    def _can_move_sw(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
     
-    def can_move_ne(self, position: GameState.Position) -> bool:
+    def _can_move_ne(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
     
-    def can_move_nw(self, position: GameState.Position) -> bool:
+    def _can_move_nw(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
     
-    def can_place_wall(self, player: GameState.Player, wall: GameState.Wall, position: GameState.Position) -> bool:
+    def can_apply_pawn_move(self, position: GameState.Position, pawn_move: PawnMove) -> bool:
+        movement = pawn_move.movement
+        if movement == GameRules.PawnMove.MovementType.UP:
+            return self._can_move_up(position)
+        elif movement == GameRules.PawnMove.MovementType.RIGHT:
+            return self._can_move_right(position)
+        elif movement == GameRules.PawnMove.MovementType.DOWN:
+            return self._can_move_down(position)
+        elif movement == GameRules.PawnMove.MovementType.LEFT:
+            return self._can_move_left(position)
+        elif movement == GameRules.PawnMove.MovementType.NE:
+            return self._can_move_ne(position)
+        elif movement == GameRules.PawnMove.MovementType.SE:
+            return self._can_move_se(position)
+        elif movement == GameRules.PawnMove.MovementType.SW:
+            return self._can_move_sw(position)
+        elif movement == GameRules.PawnMove.MovementType.NW:
+            return self._can_move_nw(position)
+        else:
+            raise ValueError("Invalid pawn move")
+
+    def can_apply_wall_move(self, player: GameState.Player, wall_move: WallMove) -> bool:
         # Check if player has remaining walls
         # TODO:
+        wall, position = wall_move.wall, wall_move.position
         try:
             self.game_state.place_wall(wall, position)
             return True
