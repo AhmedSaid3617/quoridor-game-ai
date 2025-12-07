@@ -46,20 +46,20 @@ class TestRulesOperations(unittest.TestCase):
         self.rules.game_state.vertical_edges = vertical_edges
         self.rules.game_state.horizontal_edges = horizontal_edges
         
-        self.assertTrue(self.rules.can_move_up(GameState.Position(4, 4)))
-        self.assertTrue(self.rules.can_move_right(GameState.Position(4, 4)))
-        self.assertTrue(self.rules.can_move_down(GameState.Position(4, 4)))
-        self.assertTrue(self.rules.can_move_left(GameState.Position(4, 4)))
+        self.assertTrue(self.rules._can_move_up(GameState.Position(4, 4)))
+        self.assertTrue(self.rules._can_move_right(GameState.Position(4, 4)))
+        self.assertTrue(self.rules._can_move_down(GameState.Position(4, 4)))
+        self.assertTrue(self.rules._can_move_left(GameState.Position(4, 4)))
 
-        self.assertFalse(self.rules.can_move_up(GameState.Position(0, 0)))
-        self.assertTrue(self.rules.can_move_down(GameState.Position(0, 0)))
-        self.assertTrue(self.rules.can_move_right(GameState.Position(0, 0)))
-        self.assertFalse(self.rules.can_move_left(GameState.Position(0, 0)))
+        self.assertFalse(self.rules._can_move_up(GameState.Position(0, 0)))
+        self.assertTrue(self.rules._can_move_down(GameState.Position(0, 0)))
+        self.assertTrue(self.rules._can_move_right(GameState.Position(0, 0)))
+        self.assertFalse(self.rules._can_move_left(GameState.Position(0, 0)))
 
-        self.assertTrue(self.rules.can_move_up(GameState.Position(8, 8)))
-        self.assertFalse(self.rules.can_move_down(GameState.Position(8, 8)))
-        self.assertFalse(self.rules.can_move_right(GameState.Position(8, 8)))
-        self.assertTrue(self.rules.can_move_left(GameState.Position(8, 8)))
+        self.assertTrue(self.rules._can_move_up(GameState.Position(8, 8)))
+        self.assertFalse(self.rules._can_move_down(GameState.Position(8, 8)))
+        self.assertFalse(self.rules._can_move_right(GameState.Position(8, 8)))
+        self.assertTrue(self.rules._can_move_left(GameState.Position(8, 8)))
 
         # Place walls around (4,4)
 
@@ -89,22 +89,22 @@ class TestRulesOperations(unittest.TestCase):
         self.rules.game_state.vertical_edges = vertical_edges
         self.rules.game_state.horizontal_edges = horizontal_edges
 
-        self.assertFalse(self.rules.can_move_up(GameState.Position(4, 4)))
-        self.assertFalse(self.rules.can_move_right(GameState.Position(4, 4)))
-        self.assertTrue(self.rules.can_move_down(GameState.Position(4, 4)))
-        self.assertTrue(self.rules.can_move_left(GameState.Position(4, 4)))
+        self.assertFalse(self.rules._can_move_up(GameState.Position(4, 4)))
+        self.assertFalse(self.rules._can_move_right(GameState.Position(4, 4)))
+        self.assertTrue(self.rules._can_move_down(GameState.Position(4, 4)))
+        self.assertTrue(self.rules._can_move_left(GameState.Position(4, 4)))
 
-        self.assertFalse(self.rules.can_move_up(GameState.Position(3, 4)))
-        self.assertTrue(self.rules.can_move_right(GameState.Position(3, 4)))
-        self.assertTrue(self.rules.can_move_down(GameState.Position(3, 4)))
-        self.assertFalse(self.rules.can_move_left(GameState.Position(3, 4)))
+        self.assertFalse(self.rules._can_move_up(GameState.Position(3, 4)))
+        self.assertTrue(self.rules._can_move_right(GameState.Position(3, 4)))
+        self.assertTrue(self.rules._can_move_down(GameState.Position(3, 4)))
+        self.assertFalse(self.rules._can_move_left(GameState.Position(3, 4)))
 
-        self.assertTrue(self.rules.can_move_up(GameState.Position(3, 5)))
-        self.assertTrue(self.rules.can_move_right(GameState.Position(3, 5)))
-        self.assertFalse(self.rules.can_move_down(GameState.Position(3, 5)))
-        self.assertFalse(self.rules.can_move_left(GameState.Position(3, 5)))
+        self.assertTrue(self.rules._can_move_up(GameState.Position(3, 5)))
+        self.assertTrue(self.rules._can_move_right(GameState.Position(3, 5)))
+        self.assertFalse(self.rules._can_move_down(GameState.Position(3, 5)))
+        self.assertFalse(self.rules._can_move_left(GameState.Position(3, 5)))
 
-        self.assertTrue(self.rules.can_move_up(GameState.Position(4, 5)))
-        self.assertFalse(self.rules.can_move_right(GameState.Position(4, 5)))
-        self.assertFalse(self.rules.can_move_down(GameState.Position(4, 5)))
-        self.assertTrue(self.rules.can_move_left(GameState.Position(4, 5)))
+        self.assertTrue(self.rules._can_move_up(GameState.Position(4, 5)))
+        self.assertFalse(self.rules._can_move_right(GameState.Position(4, 5)))
+        self.assertFalse(self.rules._can_move_down(GameState.Position(4, 5)))
+        self.assertTrue(self.rules._can_move_left(GameState.Position(4, 5)))
