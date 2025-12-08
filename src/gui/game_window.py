@@ -4,9 +4,59 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
-from gui.board_view import BoardWidget
+from src.gui.board_view import BoardWidget
 from controller.game_controller import GameController
-from models import GameState, Board, Player, Coord
+from src.state.game_state import GameState
+
+def game_state_init_test(game_state):
+    """Initialize the game state for testing purposes."""
+
+    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(0,0))
+    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(2, 3))
+    
+
+    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(5, 5))
+   
+    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(3, 5))
+
+    
+    """ expected_horizontal_edges = np.array([
+        [1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]).astype(bool).tolist() """
+
+
+    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 3))
+
+
+    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(4, 4))
+
+
+    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 0))
+
+
+    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(4, 2))
+
+    """
+        expected_vertical_edges = np.array([
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]).astype(bool).tolist()
+    """
+
 
 class GameWindow(QMainWindow):
     def __init__(self):
@@ -20,7 +70,7 @@ class GameWindow(QMainWindow):
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # ---------- Board view ----------
-        self.board = BoardWidget()
+        self.board = BoardWidget(parent=None)
 
         # ---------- Control pane ----------
         self.control_frame = QFrame()
@@ -60,10 +110,10 @@ class GameWindow(QMainWindow):
         self.ai_player_id=1
         self.ai_button.clicked.connect(self.set_ai_mode)
         self.undo_button = QPushButton("Undo")
-        self.undo_button.clicked.connect(lambda: self.controller.undo())
+        #self.undo_button.clicked.connect(lambda: self.controller.undo())
 
         self.redo_button = QPushButton("Redo")
-        self.redo_button.clicked.connect(lambda: self.controller.redo())
+        #self.redo_button.clicked.connect(lambda: self.controller.redo())
 
         self.ai_difficulty = QComboBox()
         self.ai_difficulty.addItems(["Easy", "Medium", "Hard"])
@@ -93,7 +143,7 @@ class GameWindow(QMainWindow):
         self.game_started = False
         self.mode = None      # "Human" or "AI"
         self.difficulty = None  # Only relevant if AI mode
-        self.game_state = None
+
         self.controller = None
 
         self.update_info()  # initial info display
@@ -101,33 +151,38 @@ class GameWindow(QMainWindow):
 
     def start_game(self):
         """Initialize game with selected mode and difficulty."""
-        board_model = Board()
-        players = [Player(0, Coord(8, 4)), Player(1, Coord(0, 4))]
-        self.game_state = GameState(board_model, players, active_player=0)
+        self.game_state = GameState()
 
-        self.controller = GameController(self.board, self.game_state, self.update_info)
+        game_state_init_test(self.game_state)
+
+        """ self.controller = GameController(self.board, self.game_state, self.update_info)
         self.controller.mode = self.mode
         self.controller.ai_player_id=self.ai_player_id
         self.controller.difficulty = self.difficulty
-        self.board.controller = self.controller
-        self.game_started = True
+        self.board.controller = self.controller """
+        #self.game_started = True
+
+        # Update the board view with the new game state
+        self.board.set_game_state(self.game_state)
+        # TODO: likely need to remove this
+        self.board.update()
 
         self.update_info()
+
 
     def update_info(self):
         """Update the info label with turn, walls, mode, and AI difficulty."""
         if self.game_started and self.game_state and self.controller:
             # Game is running
-            active = self.game_state.players[self.game_state.active_player]
-            turn_color = "Red" if active.player_id == 0 else "Blue"
+            active_color = "Red" if self.game_state.active_player == 1 else "Blue"
             mode_text = f"Mode: {self.mode}"
             if self.mode == "AI":
                 mode_text += f" ({self.difficulty})"
 
             info_text = (
-                f"Turn: {turn_color} | "
-                f"Red walls: {self.game_state.players[0].walls_left} | "
-                f"Blue walls: {self.game_state.players[1].walls_left} | "
+                f"Turn: {active_color} | "
+                f"Red walls: {self.game_state.player_one_remaining_walls} | "
+                f"Blue walls: {self.game_state.player_two_remaining_walls} | "
                 f"{mode_text}"
             )
         else:
@@ -143,7 +198,7 @@ class GameWindow(QMainWindow):
         self.difficulty = None
         self.game_state = None
         self.controller = None
-        self.board.controller = None
+        #self.board.controller = None
         self.update_info()
 
     def set_human_mode(self):

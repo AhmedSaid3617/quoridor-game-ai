@@ -5,6 +5,8 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QLabel
 
+from src.state.game_state import GameState
+
 BOARD_SIZE = 9
 
 class BoardWidget(QWidget):
@@ -28,23 +30,15 @@ class BoardWidget(QWidget):
         self.legal_moves = []
         self.hovered_cell = None  # Coord(row, col) or None
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.current_wall_orientation = "H" 
+        self.current_wall_orientation = "H"
+        self.game_state = GameState()
 
 
-    def set_pawns(self, pawns):
-        self.pawns = pawns
-        self.update()
+    def set_game_state(self, game_state: GameState):
+        self.game_state = game_state
 
-    def set_legal_moves(self, moves):
-        """moves: list of Coord"""
-        self.legal_moves = moves
-        self.update()
 
-    def set_walls(self, walls):
-        self.walls = walls
-        self.update()
-
-    def paintEvent(self, event):
+    def paintEvent(self, a0):
         painter = QPainter(self)
         pen = QPen(Qt.GlobalColor.black)
         pen.setWidth(2)
@@ -78,17 +72,50 @@ class BoardWidget(QWidget):
             painter.drawEllipse(int(x + cell_size/4), int(y + cell_size/4),
                                 int(cell_size/2), int(cell_size/2))
 
-        for pawn in self.pawns:
-            r, c, color = pawn["row"], pawn["col"], pawn["color"]
-            painter.setBrush(color)
+        # draw pawns
+        if self.game_state:
+            # Draw player one (red)
+            c = self.game_state.player_one.x
+            r = self.game_state.player_one.y
+            painter.setBrush(QColor("red"))
+            painter.setPen(Qt.GlobalColor.black)
+            x = c * cell_size + cell_size / 2
+            y = r * cell_size + cell_size / 2
+            radius = cell_size / 2 - 5
+            painter.drawEllipse(int(x - radius), int(y - radius), int(radius * 2), int(radius * 2))
+            
+            # Draw player two (blue)
+            c = self.game_state.player_two.x
+            r = self.game_state.player_two.y
+            painter.setBrush(QColor("blue"))
             painter.setPen(Qt.GlobalColor.black)
             x = c * cell_size + cell_size / 2
             y = r * cell_size + cell_size / 2
             radius = cell_size / 2 - 5
             painter.drawEllipse(int(x - radius), int(y - radius), int(radius * 2), int(radius * 2))
 
-        # draw walls
-        wall_thickness = int(cell_size / 5)
+        # draw vertical walls
+        painter.setBrush(QColor("brown"))
+        painter.setPen(Qt.GlobalColor.black)
+
+        for r in range(len(self.game_state.vertical_edges)):
+            for c in range(len(self.game_state.vertical_edges[r])):
+                if self.game_state.vertical_edges[r][c]:
+                    wall_thickness = int(cell_size / 5)
+                    x = (c+1) * cell_size - wall_thickness // 2
+                    y = r * cell_size
+                    painter.drawRect(int(x), int(y), wall_thickness, int(cell_size))
+
+        for r in range(len(self.game_state.horizontal_edges)):
+            for c in range(len(self.game_state.horizontal_edges[r])):
+                if self.game_state.horizontal_edges[r][c]:
+                    wall_thickness = int(cell_size / 5)
+                    x = c * cell_size
+                    y = (r+1) * cell_size - wall_thickness // 2
+                    painter.drawRect(int(x), int(y), int(cell_size), wall_thickness)
+                    
+                    
+        """ wall_thickness = int(cell_size / 5)
         for wall in self.walls:
             r, c, orientation = wall["row"], wall["col"], wall["orientation"]
             painter.setBrush(QColor("brown"))
@@ -102,10 +129,11 @@ class BoardWidget(QWidget):
                 # vertical wall sits to the right of column 'c'
                 x = (c + 1) * cell_size - wall_thickness // 2
                 y = r * cell_size
-                painter.drawRect(int(x), int(y), wall_thickness, int(cell_size * 2))
+                painter.drawRect(int(x), int(y), wall_thickness, int(cell_size * 2)) """
 
-    def mousePressEvent(self, event):
-        if not hasattr(self, "controller") or self.controller is None:
+    def mousePressEvent(self, a0):
+        pass
+        """ if not hasattr(self, "controller") or self.controller is None:
             return
 
         x = event.position().x()
@@ -116,7 +144,7 @@ class BoardWidget(QWidget):
         col = int(x // cell_size)
 
         button = "left" if event.button() == Qt.MouseButton.LeftButton else "right"
-        self.controller.handle_click(row, col, button=button)
+        self.controller.handle_click(row, col, button=button) """
 
 
     def show_message(self, text, duration=1000):
@@ -132,8 +160,9 @@ class BoardWidget(QWidget):
         # Hide after `duration` ms
         QTimer.singleShot(duration, self.message_label.hide)
 
-    def mouseMoveEvent(self, event):
-        cell_size = min(self.width(), self.height()) / BOARD_SIZE  # same as paintEvent
+    def mouseMoveEvent(self, a0):
+        pass
+        """ cell_size = min(self.width(), self.height()) / BOARD_SIZE  # same as paintEvent
         x = event.position().x()
         y = event.position().y()
         row = int(y // cell_size)
@@ -151,10 +180,11 @@ class BoardWidget(QWidget):
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
 
-        self.update()
+        self.update() """
     
-    def keyPressEvent(self, event):
-        if not hasattr(self, "controller") or self.controller is None:
+    def keyPressEvent(self, a0):
+        pass
+        """ if not hasattr(self, "controller") or self.controller is None:
             return
 
         # Change wall orientation
@@ -188,6 +218,6 @@ class BoardWidget(QWidget):
             if winner:
                 color = "Red" if winner.player_id == 0 else "Blue"
                 self.show_message(f"{color} wins!", 3000)
-                self.controller = None
+                self.controller = None """
                 
 

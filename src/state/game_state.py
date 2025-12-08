@@ -33,6 +33,7 @@ class GameState:
         self.player_two = self.Position(4,0)
         self.player_one_remaining_walls = 10
         self.player_two_remaining_walls = 10
+        self.active_player = self.Player.PLAYER_ONE
 
         # vertical_edges[x][y] indicates if there is a vertical wall to the right of (x, y)
         self.vertical_edges = [[False] * 8 for _ in range(9)]
@@ -41,6 +42,10 @@ class GameState:
         self.horizontal_edges = [[False] * 9 for _ in range(8)]
 
     def place_player(self, player: Player, position: Position):
+
+        if player != self.active_player:
+            raise ValueError("It's not this player's turn")
+
         if position.x < 0 or position.x >= 9 or position.y < 0 or position.y >= 9:
             raise ValueError("Invalid position: out of bounds")
 
@@ -49,12 +54,14 @@ class GameState:
                 raise ValueError("Invalid position: occupied by Player Two")
             
             self.player_one = position
+            self.active_player = self.Player.PLAYER_TWO
 
         elif player == self.Player.PLAYER_TWO:
             if self.player_one == position:
                 raise ValueError("Invalid position: occupied by Player One")
             
             self.player_two = position
+            self.active_player = self.Player.PLAYER_ONE
 
     def place_wall(self, wall: Wall, position: Position):
         if wall == self.Wall.VERTICAL:

@@ -1,13 +1,8 @@
 # controller/game_controller.py
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QMessageBox
-from models.coord import Coord
-from models.wall import Wall
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
-from ai.easy import easy_ai_move
-from ai.medium import medium_ai_move
-from ai.hard import hard_ai_move
 
 class GameController:
     def __init__(self, board_widget, game_state, update_info_callback=None):
