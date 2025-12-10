@@ -3,8 +3,6 @@ from enum import Enum
 from src.state import GameState
 
 class GameRules:
-
-
     class Move:
         @abstractmethod
         def __str__(self):
@@ -47,11 +45,38 @@ class GameRules:
     def __init__(self, game_state: GameState = GameState()):
         self.game_state = game_state
 
+
+    def _get_players_info(self):
+        """
+        Returns a tuple:
+        (player_one_enum, player_one_position, player_two_enum, player_two_position)
+        """
+        return (
+            self.game_state.Player.PLAYER_ONE,
+            self.game_state.player_one,
+            self.game_state.Player.PLAYER_TWO,
+            self.game_state.player_two
+        )
+
+    def _get_current_and_opponent_positions(self, position: GameState.Position):
+        """
+        Returns (current_player_position, opponent_player_position) based on the input position.
+        If the position does not match either player, current_player is the input position, opponent is None.
+        """
+        _, player_one_pos, _, player_two_pos = self._get_players_info()
+        if position == player_one_pos:
+            return player_one_pos, player_two_pos
+        elif position == player_two_pos:
+            return player_two_pos, player_one_pos
+        else:
+            return position, None
+
     # TODO: implement special cases, hitting a player
     def _can_move_up(self, position: GameState.Position) -> bool:
-        if position.y == 0:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        if current_player.y == 0:
             return False
-        if self.game_state.horizontal_edges[position.y - 1][position.x]:
+        if self.game_state.horizontal_edges[current_player.y - 1][current_player.x]:
             return False
         return True
     
@@ -88,6 +113,18 @@ class GameRules:
     def _can_move_nw(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
     
+    def _can_jump_up(self, position: GameState.Position) -> bool:
+        raise NotImplementedError("Diagonal movement not implemented yet")
+    
+    def _can_jump_down(self, position: GameState.Position) -> bool:
+        raise NotImplementedError("Diagonal movement not implemented yet")
+    
+    def _can_jump_right(self, position: GameState.Position) -> bool:
+        raise NotImplementedError("Diagonal movement not implemented yet")
+    
+    def _can_jump_left(self, position: GameState.Position) -> bool:
+        raise NotImplementedError("Diagonal movement not implemented yet")
+    
     def can_apply_pawn_move(self, position: GameState.Position, pawn_move: PawnMove) -> bool:
         movement = pawn_move.movement
         if movement == GameRules.PawnMove.MovementType.UP:
@@ -122,5 +159,4 @@ class GameRules:
         # BFS or DFS to check if both players have a path to their goal
         # Use helper function
         raise NotImplementedError("Pathfinding check not implemented yet")
-    
-    
+
