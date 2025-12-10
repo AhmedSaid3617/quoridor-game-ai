@@ -72,6 +72,7 @@ class GameRules:
             return position, None
 
     # TODO: implement special cases, hitting a player
+###################################### Regular moves ######################################
     def _can_move_up(self, position: GameState.Position) -> bool:
         current_player, opponent_player = self._get_current_and_opponent_positions(position)
         if current_player.y == 0:
@@ -116,6 +117,46 @@ class GameRules:
             if (current_player.y == opponent_player.y) and (current_player.x == opponent_player.x + 1):
                 return False
         return True
+
+###################################### special jumps ######################################
+    def _can_jump_up(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if (opponent_player.y == current_player.y - 1) and (self._can_move_up(self,opponent_player)):  
+            return True
+        else:
+            return False
+        
+    def _can_jump_down(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if(opponent_player.y == current_player.y + 1) and (self._can_move_down(self,opponent_player)):  
+            return True
+        else:
+            return False
+    
+    def _can_jump_right(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if (opponent_player.x == current_player.x + 1) and (self._can_move_right(self,opponent_player)):  
+            return True
+        else:
+            return False
+    
+    def _can_jump_left(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if (opponent_player.x == current_player.x - 1) and (self._can_move_left(self,opponent_player)):  
+            return True
+        else:
+            return False
+
+################################## special diagonal moves #################################
+    def _can_move_ne(self, position: GameState.Position) -> bool:
+        raise NotImplementedError("Diagonal movement not implemented yet")
+    
+    def _can_move_nw(self, position: GameState.Position) -> bool:
+        raise NotImplementedError("Diagonal movement not implemented yet")
     
     def _can_move_se(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
@@ -123,23 +164,6 @@ class GameRules:
     def _can_move_sw(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
     
-    def _can_move_ne(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
-    
-    def _can_move_nw(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
-    
-    def _can_jump_up(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
-    
-    def _can_jump_down(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
-    
-    def _can_jump_right(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
-    
-    def _can_jump_left(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
     
     def can_apply_pawn_move(self, position: GameState.Position, pawn_move: PawnMove) -> bool:
         movement = pawn_move.movement
