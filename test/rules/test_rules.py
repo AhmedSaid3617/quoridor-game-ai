@@ -200,3 +200,79 @@ class TestRulesOperations(unittest.TestCase):
         # Reset for other tests
         gs.player_one = GameState.Position(4, 8)
         gs.player_two = GameState.Position(4, 0)
+
+    def test_can_jump_up(self):
+        rules = self.rules
+        gs = rules.game_state
+        # Opponent directly above and can move up
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(4, 3)
+        gs.horizontal_edges[2][4] = False
+        self.assertTrue(rules._can_jump_up(GameState.Position(4, 4)), "Should jump up if opponent directly above and path is clear")
+        # Opponent directly above but blocked by wall
+        gs.horizontal_edges[2][4] = True
+        self.assertFalse(rules._can_jump_up(GameState.Position(4, 4)), "Should not jump up if wall blocks opponent's up move")
+        # Opponent not directly above
+        gs.player_two = GameState.Position(3, 3)
+        self.assertFalse(rules._can_jump_up(GameState.Position(4, 4)), "Should not jump up if opponent not directly above")
+        # Reset
+        gs.horizontal_edges[2][4] = False
+        gs.player_one = GameState.Position(4, 8)
+        gs.player_two = GameState.Position(4, 0)
+
+    def test_can_jump_down(self):
+        rules = self.rules
+        gs = rules.game_state
+        # Opponent directly below and can move down
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(4, 5)
+        gs.horizontal_edges[6][4] = False
+        self.assertTrue(rules._can_jump_down(GameState.Position(4, 4)), "Should jump down if opponent directly below and path is clear")
+        # Opponent directly below but blocked by wall
+        gs.horizontal_edges[6][4] = True
+        self.assertFalse(rules._can_jump_down(GameState.Position(4, 4)), "Should not jump down if wall blocks opponent's down move")
+        # Opponent not directly below
+        gs.player_two = GameState.Position(3, 5)
+        self.assertFalse(rules._can_jump_down(GameState.Position(4, 4)), "Should not jump down if opponent not directly below")
+        # Reset
+        gs.horizontal_edges[6][4] = False
+        gs.player_one = GameState.Position(4, 8)
+        gs.player_two = GameState.Position(4, 0)
+
+    def test_can_jump_right(self):
+        rules = self.rules
+        gs = rules.game_state
+        # Opponent directly right and can move right
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(5, 4)
+        gs.vertical_edges[4][6] = False
+        self.assertTrue(rules._can_jump_right(GameState.Position(4, 4)), "Should jump right if opponent directly right and path is clear")
+        # Opponent directly right but blocked by wall
+        gs.vertical_edges[4][6] = True
+        self.assertFalse(rules._can_jump_right(GameState.Position(4, 4)), "Should not jump right if wall blocks opponent's right move")
+        # Opponent not directly right
+        gs.player_two = GameState.Position(5, 5)
+        self.assertFalse(rules._can_jump_right(GameState.Position(4, 4)), "Should not jump right if opponent not directly right")
+        # Reset
+        gs.vertical_edges[4][6] = False
+        gs.player_one = GameState.Position(4, 8)
+        gs.player_two = GameState.Position(4, 0)
+
+    def test_can_jump_left(self):
+        rules = self.rules
+        gs = rules.game_state
+        # Opponent directly left and can move left
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(3, 4)
+        gs.vertical_edges[4][2] = False
+        self.assertTrue(rules._can_jump_left(GameState.Position(4, 4)), "Should jump left if opponent directly left and path is clear")
+        # Opponent directly left but blocked by wall
+        gs.vertical_edges[4][2] = True
+        self.assertFalse(rules._can_jump_left(GameState.Position(4, 4)), "Should not jump left if wall blocks opponent's left move")
+        # Opponent not directly left
+        gs.player_two = GameState.Position(3, 5)
+        self.assertFalse(rules._can_jump_left(GameState.Position(4, 4)), "Should not jump left if opponent not directly left")
+        # Reset
+        gs.vertical_edges[4][2] = False
+        gs.player_one = GameState.Position(4, 8)
+        gs.player_two = GameState.Position(4, 0)
