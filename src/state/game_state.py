@@ -9,8 +9,6 @@ class GameState:
             self.y = y
 
         def __eq__(self, other):
-            if not isinstance(other, GameState.Position):
-                return False
             return self.x == other.x and self.y == other.y
         
         def __copy__(self):
