@@ -208,13 +208,13 @@ class TestRulesOperations(unittest.TestCase):
         gs.player_one = GameState.Position(4, 4)
         gs.player_two = GameState.Position(4, 3)
         gs.horizontal_edges[2][4] = False
-        self.assertTrue(rules._can_jump_up(GameState.Position(4, 4)), "Should jump up if opponent directly above and path is clear")
+        self.assertTrue(rules._can_jump_up(gs.player_one), "Should jump up if opponent directly above and path is clear")
         # Opponent directly above but blocked by wall
         gs.horizontal_edges[2][4] = True
-        self.assertFalse(rules._can_jump_up(GameState.Position(4, 4)), "Should not jump up if wall blocks opponent's up move")
+        self.assertFalse(rules._can_jump_up(gs.player_one), "Should not jump up if wall blocks opponent's up move")
         # Opponent not directly above
         gs.player_two = GameState.Position(3, 3)
-        self.assertFalse(rules._can_jump_up(GameState.Position(4, 4)), "Should not jump up if opponent not directly above")
+        self.assertFalse(rules._can_jump_up(gs.player_one), "Should not jump up if opponent not directly above")
         # Reset
         gs.horizontal_edges[2][4] = False
         gs.player_one = GameState.Position(4, 8)
@@ -227,13 +227,13 @@ class TestRulesOperations(unittest.TestCase):
         gs.player_one = GameState.Position(4, 4)
         gs.player_two = GameState.Position(4, 5)
         gs.horizontal_edges[6][4] = False
-        self.assertTrue(rules._can_jump_down(GameState.Position(4, 4)), "Should jump down if opponent directly below and path is clear")
+        self.assertTrue(rules._can_jump_down(gs.player_one), "Should jump down if opponent directly below and path is clear")
         # Opponent directly below but blocked by wall
         gs.horizontal_edges[6][4] = True
-        self.assertFalse(rules._can_jump_down(GameState.Position(4, 4)), "Should not jump down if wall blocks opponent's down move")
+        self.assertFalse(rules._can_jump_down(gs.player_one), "Should not jump down if wall blocks opponent's down move")
         # Opponent not directly below
         gs.player_two = GameState.Position(3, 5)
-        self.assertFalse(rules._can_jump_down(GameState.Position(4, 4)), "Should not jump down if opponent not directly below")
+        self.assertFalse(rules._can_jump_down(gs.player_one), "Should not jump down if opponent not directly below")
         # Reset
         gs.horizontal_edges[6][4] = False
         gs.player_one = GameState.Position(4, 8)

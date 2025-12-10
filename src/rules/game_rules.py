@@ -122,7 +122,7 @@ class GameRules:
     def _can_jump_up(self, position: GameState.Position) -> bool:
         current_player, opponent_player = self._get_current_and_opponent_positions(position)
 
-        if (opponent_player.y == current_player.y - 1) and (self._can_move_up(opponent_player)):  
+        if (opponent_player.x == current_player.x)and(opponent_player.y == current_player.y - 1) and (self._can_move_up(opponent_player)):  
             return True
         else:
             return False
