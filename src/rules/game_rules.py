@@ -84,24 +84,37 @@ class GameRules:
         return True
     
     def _can_move_right(self, position: GameState.Position) -> bool:
-        if position.x == 8:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        if current_player.x == 8:
             return False
-        if self.game_state.vertical_edges[position.y][position.x]:
+        if self.game_state.vertical_edges[current_player.y][current_player.x]:
             return False
+        if opponent_player is not None:
+            if (current_player.y == opponent_player.y) and (current_player.x == opponent_player.x - 1):
+                return False
         return True
 
     def _can_move_down(self, position: GameState.Position) -> bool:
-        if position.y == 8:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if current_player.y == 8:
             return False
-        if self.game_state.horizontal_edges[position.y][position.x]:
+        if self.game_state.horizontal_edges[current_player.y][current_player.x]:
             return False
+        if opponent_player is not None:
+            if (current_player.x == opponent_player.x) and (current_player.y == opponent_player.y - 1):
+                return False
         return True
     
     def _can_move_left(self, position: GameState.Position) -> bool:
-        if position.x == 0:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        if current_player.x == 0:
             return False
-        if self.game_state.vertical_edges[position.y][position.x - 1]:
+        if self.game_state.vertical_edges[current_player.y][current_player.x - 1]:
             return False
+        if opponent_player is not None:
+            if (current_player.y == opponent_player.y) and (current_player.x == opponent_player.x + 1):
+                return False
         return True
     
     def _can_move_se(self, position: GameState.Position) -> bool:
