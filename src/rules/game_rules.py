@@ -78,6 +78,9 @@ class GameRules:
             return False
         if self.game_state.horizontal_edges[current_player.y - 1][current_player.x]:
             return False
+        if opponent_player is not None:
+            if (current_player.x == opponent_player.x) and (current_player.y == opponent_player.y + 1):
+                return False
         return True
     
     def _can_move_right(self, position: GameState.Position) -> bool:

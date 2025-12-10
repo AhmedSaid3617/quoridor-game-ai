@@ -108,3 +108,26 @@ class TestRulesOperations(unittest.TestCase):
         self.assertFalse(self.rules._can_move_right(GameState.Position(4, 5)))
         self.assertFalse(self.rules._can_move_down(GameState.Position(4, 5)))
         self.assertTrue(self.rules._can_move_left(GameState.Position(4, 5)))
+
+    def test_can_move_up_all_cases(self):
+        rules = self.rules
+        gs = rules.game_state
+        # Case 1: y == 0
+        self.assertFalse(rules._can_move_up(GameState.Position(4, 0)), "Should not move up from y=0")
+        # Case 2: Blocked by horizontal wall
+        gs.horizontal_edges[3][4] = True
+        self.assertFalse(rules._can_move_up(GameState.Position(4, 4)), "Should not move up if horizontal wall above")
+        gs.horizontal_edges[3][4] = False
+        # Case 3: Opponent directly above
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(4, 3)
+        self.assertFalse(rules._can_move_up(GameState.Position(4, 4)), "Should not move up if opponent directly above")
+        # Case 4: Nothing blocks
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(0, 0)
+        self.assertTrue(rules._can_move_up(GameState.Position(4, 4)), "Should move up if nothing blocks")
+        # Case 5: Not a player position
+        self.assertTrue(rules._can_move_up(GameState.Position(2, 2)), "Should move up from generic position if nothing blocks")
+        # Reset for other tests
+        gs.player_one = GameState.Position(4, 8)
+        gs.player_two = GameState.Position(4, 0)
