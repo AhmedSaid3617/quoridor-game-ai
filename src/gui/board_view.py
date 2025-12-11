@@ -170,7 +170,7 @@ class BoardWidget(QWidget):
         col = int(y // cell_size)
 
         if a0.button() == Qt.MouseButton.LeftButton:
-            pawn_move = GameRules.PawnMove(GameState.Position(row,col))
+            pawn_move = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(row,col))
             self.controller.apply_move(pawn_move)
 
         elif a0.button() == Qt.MouseButton.RightButton:

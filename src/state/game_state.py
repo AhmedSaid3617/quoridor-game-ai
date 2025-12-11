@@ -17,6 +17,12 @@ class GameState:
         def __str__(self):
             return f"({self.x}, {self.y})"
 
+        def __sub__(self, other):
+            return (self.x - other.x, self.y - other.y)
+        
+        def __add__(self, other):
+            return (self.x + other.x, self.y + other.y)
+
 
     class Player(Enum):
         PLAYER_ONE = 1

@@ -20,8 +20,13 @@ class GameController:
     def apply_move(self, move: GameRules.Move) -> bool:
 
         if isinstance(move, GameRules.PawnMove):
-            if self.rules.can_apply_pawn_placement(move, self.game_state.active_player):     # If this player can move to this position.
-                self.game_state.place_player(self.game_state.active_player, move.position)  # Then move him.
+            if self.rules.can_apply_pawn_move(move, self.game_state.active_player):     # If this player can move to this position.
+                if move.system == GameRules.PawnMove.SystemType.ABSOLUTE:
+                    self.game_state.place_player(self.game_state.active_player, move.position)  # Then move him.
+                else:
+                    position  = self.game_state.player_one if self.game_state.active_player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+                    self.game_state.place_player(self.game_state.active_player, position + GameRules.movement_to_delta(move.movement))  # Then move him.
+                
                 return True
             
         elif isinstance(move, GameRules.WallMove):
