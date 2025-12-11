@@ -53,6 +53,7 @@ class GameState:
             if self.player_two == position:
                 raise ValueError("Invalid position: occupied by Player Two")
             
+            # TODO: move this.
             self.player_one = position
             self.active_player = self.Player.PLAYER_TWO
 
@@ -60,9 +61,11 @@ class GameState:
             if self.player_one == position:
                 raise ValueError("Invalid position: occupied by Player One")
             
+            # TODO: move this
             self.player_two = position
             self.active_player = self.Player.PLAYER_ONE
 
+    # TODO: who decrements the walls?
     def place_wall(self, wall: Wall, position: Position):
         if wall == self.Wall.VERTICAL:
             if position.x < 0 or position.x > 7 or position.y < 0 or position.y > 7:
@@ -75,7 +78,7 @@ class GameState:
             self.vertical_edges[position.y + 1][position.x] = True
 
         elif wall == self.Wall.HORIZONTAL:
-            if position.x < 0 or position.x >= 7 or position.y < 0 or position.y > 7:
+            if position.x < 0 or position.x > 7 or position.y < 0 or position.y > 7:
                 raise ValueError("Invalid position for horizontal wall")
             
             if self.horizontal_edges[position.y][position.x] or self.horizontal_edges[position.y][position.x + 1]:

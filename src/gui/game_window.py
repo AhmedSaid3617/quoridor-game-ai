@@ -1,3 +1,4 @@
+from enum import Enum
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QComboBox, QFrame, QSizePolicy
@@ -5,7 +6,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
 from src.gui.board_view import BoardWidget
-from controller.game_controller import GameController
+from src.controller.game_controller import GameController
 from src.state.game_state import GameState
 
 # TODO: Remove this function and use actual game initialization in production
@@ -60,6 +61,11 @@ def game_state_init_test(game_state):
 
 
 class GameWindow(QMainWindow):
+
+    class GameMode(Enum):
+        HUMAN = 1
+        AI = 2
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Quoridor")
@@ -140,7 +146,7 @@ class GameWindow(QMainWindow):
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
 
-        # ---------- Game state ----------
+        # ---------- Game config ----------
         self.game_started = False
         self.mode = None      # "Human" or "AI"
         self.difficulty = None  # Only relevant if AI mode
@@ -154,17 +160,16 @@ class GameWindow(QMainWindow):
         """Initialize game with selected mode and difficulty."""
         self.game_state = GameState()
 
-        game_state_init_test(self.game_state)
+        #game_state_init_test(self.game_state)
 
-        """ self.controller = GameController(self.board, self.game_state, self.update_info)
-        self.controller.mode = self.mode
-        self.controller.ai_player_id=self.ai_player_id
-        self.controller.difficulty = self.difficulty
-        self.board.controller = self.controller """
-        #self.game_started = True
+        self.controller = GameController(self.game_state, GameState.Player.PLAYER_ONE)
+        
+        # TODO: do i need this?
+        self.game_started = True
 
         # Update the board view with the new game state
         self.board.set_game_state(self.game_state)
+        self.board.set_controller(self.controller)
         
         # TODO: likely need to remove this
         self.board.update()
@@ -204,13 +209,14 @@ class GameWindow(QMainWindow):
         self.update_info()
 
     def set_human_mode(self):
-        self.mode = "Human"
+        self.mode = self.GameMode.HUMAN
         self.difficulty = None
         self.start_game()
 
     def set_ai_mode(self):
-        self.mode = "AI"
-        self.difficulty = self.ai_difficulty.currentText()
+        self.mode = self.GameMode.AI
+        self.difficulty = self.ai_difficulty.currentIndex() + 1  # Enum starts at 1
+        self.ai_player_id=2  # AI plays as Blue
         self.start_game()
     
 

@@ -29,8 +29,7 @@ class GameRules:
 
         def __str__(self):
             return f"Move {str.lower(self.movement.value)}"
-
-
+    
     """
     Placement of a wall (vertical or horizontal).
     """
@@ -88,7 +87,13 @@ class GameRules:
     def _can_move_nw(self, position: GameState.Position) -> bool:
         raise NotImplementedError("Diagonal movement not implemented yet")
     
-    def can_apply_pawn_move(self, position: GameState.Position, pawn_move: PawnMove) -> bool:
+    def can_apply_pawn_placement(self, position: GameState.Position, player:GameState.Player) -> bool:
+        return True
+        # TODO: implement this.
+    
+    def can_apply_pawn_move(self, pawn_move:PawnMove, player:GameState.Player) -> bool:
+        # TODO: implement this.
+        return True
         movement = pawn_move.movement
         if movement == GameRules.PawnMove.MovementType.UP:
             return self._can_move_up(position)
@@ -111,7 +116,8 @@ class GameRules:
 
     def can_apply_wall_move(self, player: GameState.Player, wall_move: WallMove) -> bool:
         # Check if player has remaining walls
-        # TODO:
+        # TODO: implement this
+        return True
         wall, position = wall_move.wall, wall_move.position
         try:
             self.game_state.place_wall(wall, position)
