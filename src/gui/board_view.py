@@ -37,6 +37,22 @@ class BoardWidget(QWidget):
     def set_game_state(self, game_state: GameState):
         self.game_state = game_state
 
+    
+    def paint_wall(self, painter, row, col, orientation, cell_size):
+        wall_thickness = int(cell_size / 5)
+        painter.setBrush(QColor("brown"))
+        painter.setPen(Qt.GlobalColor.black)
+        if orientation == "H":
+            # horizontal wall sits below the row 'row'
+            x = col * cell_size
+            y = (row + 1) * cell_size - wall_thickness // 2
+            painter.drawRect(int(x), int(y), int(cell_size * 2), wall_thickness)
+        elif orientation == "V":
+            # vertical wall sits to the right of column 'col'
+            x = (col + 1) * cell_size - wall_thickness // 2
+            y = row * cell_size
+            painter.drawRect(int(x), int(y), wall_thickness, int(cell_size * 2))
+
 
     def paintEvent(self, a0):
         painter = QPainter(self)
@@ -59,9 +75,8 @@ class BoardWidget(QWidget):
         # --- Hover
         if self.hovered_cell:
             row, col = self.hovered_cell
-            painter.setBrush(QColor(255, 255, 0, 100))  # yellow
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawRect(int(col*cell_size), int(row*cell_size), int(cell_size), int(cell_size))
+            # TODO: draw wall preview
+            #self.paint_wall(painter, row, col, self.current_wall_orientation, cell_size)
 
         # --- Legal moves
         painter.setBrush(QColor(0, 255, 0, 120))  # green
@@ -162,9 +177,9 @@ class BoardWidget(QWidget):
 
     def mouseMoveEvent(self, a0):
         pass
-        """ cell_size = min(self.width(), self.height()) / BOARD_SIZE  # same as paintEvent
-        x = event.position().x()
-        y = event.position().y()
+        cell_size = min(self.width(), self.height()) / BOARD_SIZE  # same as paintEvent
+        x = a0.position().x()
+        y = a0.position().y()
         row = int(y // cell_size)
         col = int(x // cell_size)
 
@@ -180,21 +195,21 @@ class BoardWidget(QWidget):
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
 
-        self.update() """
+        self.update()
     
     def keyPressEvent(self, a0):
         pass
         """ if not hasattr(self, "controller") or self.controller is None:
-            return
+            return """
 
         # Change wall orientation
-        if event.key() == Qt.Key.Key_H:
+        if a0.key() == Qt.Key.Key_H:
             self.current_wall_orientation = "H"
             self.show_message("Wall orientation: Horizontal", 1000)
-        elif event.key() == Qt.Key.Key_V:
+        elif a0.key() == Qt.Key.Key_V:
             self.current_wall_orientation = "V"
             self.show_message("Wall orientation: Vertical", 1000)
-
+        """
         # WASD / arrow keys for pawn movement
         player = self.controller.game_state.players[self.controller.game_state.active_player]
         opponent = self.controller.game_state.get_opponent_position(player)

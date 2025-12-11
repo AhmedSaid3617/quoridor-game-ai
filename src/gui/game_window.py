@@ -8,6 +8,7 @@ from src.gui.board_view import BoardWidget
 from controller.game_controller import GameController
 from src.state.game_state import GameState
 
+# TODO: Remove this function and use actual game initialization in production
 def game_state_init_test(game_state):
     """Initialize the game state for testing purposes."""
 
@@ -164,6 +165,7 @@ class GameWindow(QMainWindow):
 
         # Update the board view with the new game state
         self.board.set_game_state(self.game_state)
+        
         # TODO: likely need to remove this
         self.board.update()
 
