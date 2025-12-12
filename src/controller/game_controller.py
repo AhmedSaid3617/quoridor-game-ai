@@ -3,11 +3,40 @@ from src.state.game_state import GameState
 
 
 class GameController:
-    def __init__(self, rules: GameRules, state: GameState, starting_player: GameState.Player):
-        self.rules = rules
-        self.state = state
+    def __init__(self, game_state: GameState, starting_player: GameState.Player):
+        
+        self.game_state = game_state
         self.current_player = starting_player
+        self.rules = GameRules()
 
+    def check_winner(self) -> GameState.Player | None:
+        if self.game_state.player_one.y == 0:
+            return GameState.Player.PLAYER_ONE
+        elif self.game_state.player_two.y == 8:
+            return GameState.Player.PLAYER_TWO
+        else:
+            return None
+    
     def apply_move(self, move: GameRules.Move) -> bool:
-        # somewhere here state.place_player or place_wall based on move type
-        raise NotImplementedError("Move application not implemented yet")
+
+        if isinstance(move, GameRules.PawnMove):
+            if self.rules.can_apply_pawn_move(move, self.game_state.active_player):     # If this player can move to this position.
+                if move.system == GameRules.PawnMove.SystemType.ABSOLUTE:
+                    self.game_state.place_player(self.game_state.active_player, move.position)  # Then move him.
+                else:
+                    position  = self.game_state.player_one if self.game_state.active_player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+                    self.game_state.place_player(self.game_state.active_player, position + GameRules.movement_to_delta(move.movement))  # Then move him.
+                
+                return True
+            
+        elif isinstance(move, GameRules.WallMove):
+            if self.rules.can_apply_wall_move(self.game_state.active_player, move): # If this player can play this wall move.
+                self.game_state.place_wall(move.wall, move.position) # Then place a wall at this postion.
+                return True
+                
+        else:
+            raise ValueError("Unknown move type")
+        
+
+        
+        return False

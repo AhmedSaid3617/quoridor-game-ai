@@ -17,6 +17,12 @@ class GameState:
         def __str__(self):
             return f"({self.x}, {self.y})"
 
+        def __sub__(self, other):
+            return (self.x - other.x, self.y - other.y)
+        
+        def __add__(self, other):
+            return (self.x + other.x, self.y + other.y)
+
 
     class Player(Enum):
         PLAYER_ONE = 1
@@ -33,6 +39,7 @@ class GameState:
         self.player_two = self.Position(4,0)
         self.player_one_remaining_walls = 10
         self.player_two_remaining_walls = 10
+        self.active_player = self.Player.PLAYER_ONE
 
         # vertical_edges[x][y] indicates if there is a vertical wall to the right of (x, y)
         self.vertical_edges = [[False] * 8 for _ in range(9)]
@@ -41,6 +48,7 @@ class GameState:
         self.horizontal_edges = [[False] * 9 for _ in range(8)]
 
     def place_player(self, player: Player, position: Position):
+
         if position.x < 0 or position.x >= 9 or position.y < 0 or position.y >= 9:
             raise ValueError("Invalid position: out of bounds")
 
@@ -48,14 +56,19 @@ class GameState:
             if self.player_two == position:
                 raise ValueError("Invalid position: occupied by Player Two")
             
+            # TODO: move this.
             self.player_one = position
+            self.active_player = self.Player.PLAYER_TWO
 
         elif player == self.Player.PLAYER_TWO:
             if self.player_one == position:
                 raise ValueError("Invalid position: occupied by Player One")
             
+            # TODO: move this
             self.player_two = position
+            self.active_player = self.Player.PLAYER_ONE
 
+    # TODO: who decrements the walls?
     def place_wall(self, wall: Wall, position: Position):
         if wall == self.Wall.VERTICAL:
             if position.x < 0 or position.x > 7 or position.y < 0 or position.y > 7:
@@ -68,7 +81,7 @@ class GameState:
             self.vertical_edges[position.y + 1][position.x] = True
 
         elif wall == self.Wall.HORIZONTAL:
-            if position.x < 0 or position.x >= 7 or position.y < 0 or position.y > 7:
+            if position.x < 0 or position.x > 7 or position.y < 0 or position.y > 7:
                 raise ValueError("Invalid position for horizontal wall")
             
             if self.horizontal_edges[position.y][position.x] or self.horizontal_edges[position.y][position.x + 1]:

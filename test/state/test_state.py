@@ -246,3 +246,11 @@ class TestStateOperations(unittest.TestCase):
 
         copied_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 2))
         self.assertNotEqual(copied_state.vertical_edges, self.state.vertical_edges)
+
+    def test_position_add_and_sub(self):
+        a = GameState.Position(8, 9)
+        b = GameState.Position(5, -3)
+        self.assertEqual(a - b, (8 - 5, 9 - -3))
+        self.assertEqual(b - a, (5 - 8, -3 - 9))
+        self.assertEqual(b + a, (5 + 8, -3 + 9))
+        self.assertEqual(a + b, (8 + 5, 9 + -3))
