@@ -7,5 +7,5 @@ omit =
     src/helpers/path_solver.py
     src/helpers/wall_block_solver.py
     src/rules/game_rules.py
-    gui/board_view.py
-    gui/game_window.py
+    src/gui/board_view.py
+    src/gui/game_window.py
