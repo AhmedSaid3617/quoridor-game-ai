@@ -276,3 +276,72 @@ class TestRulesOperations(unittest.TestCase):
         gs.vertical_edges[4][2] = False
         gs.player_one = GameState.Position(4, 8)
         gs.player_two = GameState.Position(4, 0)
+
+    def test_can_move_ne(self):
+        rules = self.rules
+        gs = rules.game_state
+        # Opponent directly above and can't move up
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(4, 3)
+        gs.horizontal_edges[2][4] = True
+        self.assertTrue(rules._can_move_ne(gs.player_one), "Should move ne if opponent directly above and can't move up")
+
+        # opponent right move is blocked
+        gs.vertical_edges[3][4] = True
+        self.assertFalse(rules._can_move_ne(gs.player_one), "Should move not ne if opponent directly above and can't move up or right")
+        gs.vertical_edges[3][4] = False
+
+        # Opponent directly up but can move up
+        gs.horizontal_edges[2][4] = False
+        self.assertFalse(rules._can_move_ne(gs.player_one), "Should not move ne if opponent directly above and can move up")
+
+        #opponent is on  the right and can't move to the right
+        gs.player_two = GameState.Position(5,4)
+        gs.vertical_edges [4][5] = True
+        self.assertTrue(rules._can_move_ne(gs.player_one), "Should move ne if opponent directly right and can't move right")
+
+        # opponent is not directly above or to the right
+        gs.player_two = GameState.Position(4,5) 
+        gs.vertical_edges [4][5] = False
+        self.assertFalse(rules._can_move_ne(gs.player_one), "Should not move ne if opponent is not directly to the right or above")
+
+        # Reset
+        gs.vertical_edges[4][2] = False
+        gs.player_one = GameState.Position(4, 8)
+        gs.player_two = GameState.Position(4, 0)
+
+
+    def test_can_move_nw(self):
+        rules = self.rules
+        gs = rules.game_state
+        # Opponent directly above and can't move up
+        gs.player_one = GameState.Position(4, 4)
+        gs.player_two = GameState.Position(4, 3)
+        gs.horizontal_edges[2][4] = True
+        self.assertTrue(rules._can_move_nw(gs.player_one), "Should move nw if opponent directly above and can't move up")
+
+        # opponent left move is blocked
+        gs.vertical_edges[3][3] = True
+        self.assertFalse(rules._can_move_nw(gs.player_one), "Should move not nw if opponent directly above and can't move up or left")
+        gs.vertical_edges[3][3] = False
+
+        # Opponent directly up but can move up
+        gs.horizontal_edges[2][4] = False
+        self.assertFalse(rules._can_move_nw(gs.player_one), "Should not move nw if opponent directly above and can move up")
+
+        #opponent is on  the right and can't move to the right
+        gs.player_one = GameState.Position(2,5)
+        gs.player_two = GameState.Position(1,5)
+        gs.vertical_edges [5][0] = True
+        gs.vertical_edges [6][0] = False
+        self.assertTrue(rules._can_move_nw(gs.player_one), "Should move nw if opponent directly left and can't move left")
+
+        # opponent is not directly above or to the left
+        gs.player_two = GameState.Position(4,5) 
+        self.assertFalse(rules._can_move_nw(gs.player_one), "Should not move nw if opponent is not directly to the left or above")
+
+        # Reset
+        gs.vertical_edges[4][2] = False
+        gs.vertical_edges[5][0] = False
+        gs.player_one = GameState.Position(4, 8)
+        gs.player_two = GameState.Position(4, 0)
