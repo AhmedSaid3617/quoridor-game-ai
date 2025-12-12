@@ -49,9 +49,6 @@ class GameState:
 
     def place_player(self, player: Player, position: Position):
 
-        if player != self.active_player:
-            raise ValueError("It's not this player's turn")
-
         if position.x < 0 or position.x >= 9 or position.y < 0 or position.y >= 9:
             raise ValueError("Invalid position: out of bounds")
 

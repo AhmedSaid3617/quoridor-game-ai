@@ -330,7 +330,7 @@ class GameRules:
 
 
     @staticmethod
-    def _delta_to_movement(delta) -> GameRules.PawnMove.MovementType | None:
+    def _delta_to_movement(delta) -> PawnMove.MovementType | None:
         # reverse the dictionary
         lookup = {v: k for k, v in GameRules._movement_to_delta_dict().items()}
 
