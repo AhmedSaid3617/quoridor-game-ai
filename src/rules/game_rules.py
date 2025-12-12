@@ -4,8 +4,6 @@ from typing import Tuple
 from src.state import GameState
 
 class GameRules:
-
-
     class Move:
         @abstractmethod
         def __str__(self):
@@ -60,46 +58,226 @@ class GameRules:
     def __init__(self, game_state: GameState = GameState()):
         self.game_state = game_state
 
+
+    def _get_players_info(self):
+        """
+        Returns a tuple:
+        (player_one_enum, player_one_position, player_two_enum, player_two_position)
+        """
+        return (
+            self.game_state.Player.PLAYER_ONE,
+            self.game_state.player_one,
+            self.game_state.Player.PLAYER_TWO,
+            self.game_state.player_two
+        )
+
+    def _get_current_and_opponent_positions(self, position: GameState.Position):
+        """
+        Returns (current_player_position, opponent_player_position) based on the input position.
+        If the position does not match either player, current_player is the input position, opponent is None.
+        """
+        _, player_one_pos, _, player_two_pos = self._get_players_info()
+        if position == player_one_pos:
+            return player_one_pos, player_two_pos
+        elif position == player_two_pos:
+            return player_two_pos, player_one_pos
+        else:
+            return position, None
+
     # TODO: implement special cases, hitting a player
+###################################### Regular moves ######################################
     def _can_move_up(self, position: GameState.Position) -> bool:
-        if position.y == 0:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        if current_player.y == 0:
             return False
-        if self.game_state.horizontal_edges[position.y - 1][position.x]:
+        if self.game_state.horizontal_edges[current_player.y - 1][current_player.x]:
             return False
+        if opponent_player is not None:
+            if (current_player.x == opponent_player.x) and (current_player.y == opponent_player.y + 1):
+                return False
         return True
     
     def _can_move_right(self, position: GameState.Position) -> bool:
-        if position.x == 8:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        if current_player.x == 8:
             return False
-        if self.game_state.vertical_edges[position.y][position.x]:
+        if self.game_state.vertical_edges[current_player.y][current_player.x]:
             return False
+        if opponent_player is not None:
+            if (current_player.y == opponent_player.y) and (current_player.x == opponent_player.x - 1):
+                return False
         return True
 
     def _can_move_down(self, position: GameState.Position) -> bool:
-        if position.y == 8:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if current_player.y == 8:
             return False
-        if self.game_state.horizontal_edges[position.y][position.x]:
+        if self.game_state.horizontal_edges[current_player.y][current_player.x]:
             return False
+        if opponent_player is not None:
+            if (current_player.x == opponent_player.x) and (current_player.y == opponent_player.y - 1):
+                return False
         return True
     
     def _can_move_left(self, position: GameState.Position) -> bool:
-        if position.x == 0:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        if current_player.x == 0:
             return False
-        if self.game_state.vertical_edges[position.y][position.x - 1]:
+        if self.game_state.vertical_edges[current_player.y][current_player.x - 1]:
             return False
+        if opponent_player is not None:
+            if (current_player.y == opponent_player.y) and (current_player.x == opponent_player.x + 1):
+                return False
         return True
+
+###################################### special jumps ######################################
+    def _can_jump_up(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if (opponent_player.x == current_player.x)and(opponent_player.y == current_player.y - 1) and (self._can_move_up(opponent_player)):  
+            return True
+        else:
+            return False
+        
+    def _can_jump_down(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if(opponent_player.x == current_player.x) and (opponent_player.y == current_player.y + 1) and (self._can_move_down(opponent_player)):  
+            return True
+        else:
+            return False
+    
+    def _can_jump_right(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if (opponent_player.y == current_player.y) and(opponent_player.x == current_player.x + 1) and (self._can_move_right(opponent_player)):  
+            return True
+        else:
+            return False
+    
+    def _can_jump_left(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+
+        if (opponent_player.y == current_player.y) and(opponent_player.x == current_player.x - 1) and (self._can_move_left(opponent_player)):  
+            return True
+        else:
+            return False
+
+################################## special diagonal moves #################################
+    def _can_move_ne(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        same_x = (opponent_player.x == current_player.x)
+        same_y = (opponent_player.y == current_player.y)
+
+        oppnentIsAbove = (opponent_player.y == current_player.y - 1) and same_x
+        opponentIsRight = (opponent_player.x == current_player.x + 1) and same_y
+
+        jump_up_blocked    = not self._can_jump_up(current_player)
+        jump_right_blocked = not self._can_jump_right(current_player)
+
+        oppnent_can_move_right = self._can_move_right(opponent_player)
+        oppnent_can_move_up    = self._can_move_up(opponent_player)
+
+        if same_x and oppnentIsAbove and jump_up_blocked: 
+            if oppnent_can_move_right: 
+                return True
+            else:
+                return False
+        elif same_y and opponentIsRight and jump_right_blocked:
+            if oppnent_can_move_up:
+                return True
+            else: 
+                return False
+        else:
+            return False
+        
+    def _can_move_nw(self, position: GameState.Position) -> bool:
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        same_x = (opponent_player.x == current_player.x)
+        same_y = (opponent_player.y == current_player.y)
+
+        oppnentIsAbove  = (opponent_player.y == current_player.y - 1)
+        opponentIsLeft = (opponent_player.x == current_player.x - 1) and same_y
+
+        jump_up_blocked    = not self._can_jump_up(current_player)
+        jump_left_blocked  = not self._can_jump_left(current_player)
+
+        oppnent_can_move_left = self._can_move_left(opponent_player)
+        oppnent_can_move_down = self._can_move_down(opponent_player)
+
+        if same_x and oppnentIsAbove and jump_up_blocked:
+            
+            if oppnent_can_move_left: 
+                return True
+            else:
+                return False
+        elif same_y and opponentIsLeft and jump_left_blocked:
+            if oppnent_can_move_down:
+                return True
+            else:
+                return False
+        else:
+            return False
     
     def _can_move_se(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        same_x = (opponent_player.x == current_player.x)
+        same_y = (opponent_player.y == current_player.y)
+
+        oppnentIsBelow  = (opponent_player.y == current_player.y + 1)
+        opponentIsRight = (opponent_player.x == current_player.x + 1) and same_y
+
+        jump_down_blocked    = not self._can_jump_down(current_player)
+        jump_right_blocked   = not self._can_jump_right(current_player)
+
+        oppnent_can_move_down = self._can_move_down(opponent_player)
+        oppnent_can_move_right = self._can_move_right(opponent_player)
+
+        if same_x and oppnentIsBelow and jump_down_blocked:
+            
+            if oppnent_can_move_right: 
+                return True
+            else:
+                return False
+        elif same_y and opponentIsRight and jump_right_blocked:
+            if oppnent_can_move_down:
+                return True
+            else:
+                return False
+        else:
+            return False
+    
     
     def _can_move_sw(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
+        current_player, opponent_player = self._get_current_and_opponent_positions(position)
+        same_x = (opponent_player.x == current_player.x)
+        same_y = (opponent_player.y == current_player.y)
+
+        oppnentIsBelow  = (opponent_player.y == current_player.y + 1)
+        opponentIsLeft = (opponent_player.x == current_player.x - 1) and same_y
+
+        jump_down_blocked    = not self._can_jump_down(current_player)
+        jump_left_blocked   = not self._can_jump_left(current_player)
+
+        oppnent_can_move_down = self._can_move_down(opponent_player)
+        oppnent_can_move_left = self._can_move_left(opponent_player)
+
+        if same_x and oppnentIsBelow and jump_down_blocked:
+            
+            if oppnent_can_move_left: 
+                return True
+            else:
+                return False
+        elif same_y and opponentIsLeft and jump_left_blocked:
+            if oppnent_can_move_down:
+                return True
+            else:
+                return False
+        else:
+            return False
     
-    def _can_move_ne(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
     
-    def _can_move_nw(self, position: GameState.Position) -> bool:
-        raise NotImplementedError("Diagonal movement not implemented yet")
     
     
     def can_apply_pawn_move(self, pawn_move:PawnMove, player:GameState.Player) -> bool:
