@@ -20,3 +20,9 @@ class StateController:
             self.game_state.player_two_remaining_walls -= 1
 
         self.game_state.place_wall(move.wall, move.position)
+
+    def get_player_position(self, player: GameState.Player) -> GameState.Position:
+        if player == GameState.Player.PLAYER_ONE:
+            return self.state.player_one
+        else:
+            return self.state.player_two

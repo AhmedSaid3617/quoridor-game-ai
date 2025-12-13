@@ -398,3 +398,15 @@ class GameRules:
                 valid_moves.add(new_move)
 
         return valid_moves
+    #get all pawn movies absolute using the player and current position as input
+    def all_pown_moves_absolute_using_position(self,player: GameState.Player,c_position : GameState.Position) -> Set[PawnMove]:
+        position = c_position
+        valid_moves = set()
+
+        for move_type, handler in self._movement_to_handler_dict().items():
+            if handler(position):
+                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.ABSOLUTE, position=(position + self.movement_to_delta(move_type)))
+                valid_moves.add(new_move)
+
+        return valid_moves
+        
