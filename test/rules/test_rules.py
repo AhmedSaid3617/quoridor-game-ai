@@ -411,3 +411,17 @@ class TestRulesOperations(unittest.TestCase):
         # Reset
         gs.player_one = GameState.Position(4, 8)
         gs.player_two = GameState.Position(4, 0)
+
+
+    def test_all_valid_moves(self):
+        rules = self.rules
+        gs = rules.game_state # starting of game
+
+        expected_relative = {
+                GameRules.PawnMove(GameRules.PawnMove.SystemType.RELATIVE, movement=GameRules.PawnMove.MovementType.UP),
+                GameRules.PawnMove(GameRules.PawnMove.SystemType.RELATIVE, movement=GameRules.PawnMove.MovementType.RIGHT),
+                GameRules.PawnMove(GameRules.PawnMove.SystemType.RELATIVE, movement=GameRules.PawnMove.MovementType.LEFT),
+        }
+        actual_relative = rules.all_pawn_moves_relative(GameState.Player.PLAYER_ONE)
+        
+        self.assertEqual(actual_relative, expected_relative)
