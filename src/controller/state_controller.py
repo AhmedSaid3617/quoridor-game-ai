@@ -23,6 +23,6 @@ class StateController:
 
     def get_player_position(self, player: GameState.Player) -> GameState.Position:
         if player == GameState.Player.PLAYER_ONE:
-            return self.state.player_one
+            return self.game_state.player_one
         else:
-            return self.state.player_two
+            return self.game_state.player_two

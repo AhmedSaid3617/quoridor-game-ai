@@ -21,6 +21,9 @@ class GameState:
             return (self.x - other.x, self.y - other.y)
         
         def __add__(self, other):
+            if isinstance(other, tuple):
+                return (self.x + other[0], self.y + other[1])
+            
             return (self.x + other.x, self.y + other.y)
 
 
@@ -97,3 +100,18 @@ class GameState:
         new_state.vertical_edges = [row[:] for row in self.vertical_edges]
         new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
         return new_state
+    
+    def get_biased_for_player(self, opponent: GameState.Player):
+        new_state = GameStateBiased(self.player_one if opponent == GameState.Player.PLAYER_TWO else self.player_two)
+        new_state.player_one = self.player_one
+        new_state.player_two = self.player_two.__copy__()
+        new_state.vertical_edges = [row[:] for row in self.vertical_edges]
+        new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
+        return new_state
+
+    
+
+class GameStateBiased(GameState):
+    def __init__(self, opponent: GameState.Position):
+        super().__init__()
+        self.opponent = opponent

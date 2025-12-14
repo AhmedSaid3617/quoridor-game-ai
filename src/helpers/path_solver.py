@@ -7,18 +7,20 @@ from src.state.game_state import *
 
 
 class PathSolver:
+    @staticmethod
     def solve_any(start: GameState.Position, goal_y: int, game_state: GameState) -> Path:
         return PathSolver.solve_optimum(start, goal_y, game_state)
     
+    @staticmethod
     def solve_optimum(player: GameState.Player, goal_y: int, game_state: GameState) -> Path:
         my_state = game_state.__copy__()
         #9*9 matrix for visited positions
         visited = [[False for _ in range(9)] for _ in range(9)]
         #bfs queue of pathes
         bfs_queue: List[Path] = []
-        rules = GameRules(game_state)
+        rules = GameRules(game_state.get_biased_for_player(GameState.Player.PLAYER_ONE if player == GameState.Player.PLAYER_TWO else GameState.Player.PLAYER_TWO))
         state_controller = StateController(my_state)
-        initial_postion = state_controller.get_player_position(player, my_state)
+        initial_postion = state_controller.get_player_position(player)
         initial_path = Path(start=initial_postion, path=[])
         bfs_queue.append(initial_path)
         while bfs_queue:
@@ -31,8 +33,10 @@ class PathSolver:
                 
             available_moves = rules.all_pown_moves_absolute_using_position(player,current_position)
             for move in available_moves:
-                dx,dy=rules.movement_to_delta(move)
-                new_position = Position(x=current_position.x+dx, y=current_position.y+dy)
+                dx,dy=rules.movement_to_delta(move.movement)
+                new_position = GameState.Position(x=current_position.x+dx, y=current_position.y+dy)
+                # if new_position.x > 8 or new_position.y > 8 or new_position.x < 0 or new_position.y < 0:
+                #     continue
                 if not visited[new_position.y][new_position.x]:
                     new_path = Path(start=current_path.start, path=current_path.path + [move])
                     bfs_queue.append(new_path)
@@ -41,15 +45,16 @@ class PathSolver:
         return None
     #private function that takes the visited matrix and move to mark this move positions as visited
 
-
+    @staticmethod
     def solve_all_optimum(player: GameState.Player, goal_y: int, game_state: GameState) -> List[Path]:
     # 1. Use Distance Matrix (Integers), not Boolean
+        my_state = game_state.__copy__()
         min_dist = [[999 for _ in range(9)] for _ in range(9)]
 
         bfs_queue = []
         paths = []
 
-        rules = GameRules(game_state)
+        rules = GameRules(game_state.get_biased_for_player(my_state.player_one if player == GameState.Player.PLAYER_TWO else my_state.player_two))
         state_controller = StateController(game_state)
 
         initial_pos = state_controller.get_player_position(player, game_state)

@@ -1,4 +1,5 @@
 from typing import List
+from src.controller.state_controller import StateController
 from src.rules.game_rules import GameRules
 from src.state.game_state import GameState
 
@@ -12,7 +13,7 @@ class Path:
 
     def calculate_end_position(self) -> GameState.Position:
         current_position = self.start
-        rules = GameRules(None)  # Assuming GameRules can be initialized without a game state for this calculation
         for move in self.path:
-            current_position = rules.apply_pawn_move(current_position, move)
+            t = current_position + GameRules.movement_to_delta(move.movement)
+            current_position = GameState.Position(t[0], t[1])
         return current_position

@@ -2,6 +2,7 @@ from abc import abstractmethod
 from enum import Enum
 from typing import Set, Tuple
 from src.state import GameState
+from src.state.game_state import GameStateBiased
 
 class GameRules:
     class Move:
@@ -61,7 +62,9 @@ class GameRules:
             return f"Place {str.lower(self.wall.value)} wall at {self.position}"               
 
 
-    def __init__(self, game_state: GameState = GameState()):
+    def __init__(self, game_state: GameStateBiased):
+        if not isinstance(game_state, GameStateBiased):
+            raise ValueError("Need a biased game state to know the position of opponent")
         self.game_state = game_state
 
 
@@ -78,17 +81,7 @@ class GameRules:
         )
 
     def _get_current_and_opponent_positions(self, position: GameState.Position):
-        """
-        Returns (current_player_position, opponent_player_position) based on the input position.
-        If the position does not match either player, current_player is the input position, opponent is None.
-        """
-        _, player_one_pos, _, player_two_pos = self._get_players_info()
-        if position == player_one_pos:
-            return player_one_pos, player_two_pos
-        elif position == player_two_pos:
-            return player_two_pos, player_one_pos
-        else:
-            return position, None
+        return position, self.game_state.opponent
 
 ###################################### Regular moves ######################################
     def _can_move_up(self, position: GameState.Position) -> bool:
@@ -323,16 +316,16 @@ class GameRules:
     @staticmethod
     def _movement_to_delta_dict() -> Tuple:
         return {
-            GameRules.PawnMove.MovementType.UP:         (0, 1),
-            GameRules.PawnMove.MovementType.JUMP_UP:    (0, 2),
-            GameRules.PawnMove.MovementType.DOWN:       (0, -1),
-            GameRules.PawnMove.MovementType.JUMP_DOWN:  (0, -2),
+            GameRules.PawnMove.MovementType.UP:         (0, -1),
+            GameRules.PawnMove.MovementType.JUMP_UP:    (0, -2),
+            GameRules.PawnMove.MovementType.DOWN:       (0, 1),
+            GameRules.PawnMove.MovementType.JUMP_DOWN:  (0, 2),
             GameRules.PawnMove.MovementType.LEFT:       (-1, 0),
             GameRules.PawnMove.MovementType.RIGHT:      (1, 0),
-            GameRules.PawnMove.MovementType.NE:         (1, 1),
-            GameRules.PawnMove.MovementType.SE:         (1, -1),
-            GameRules.PawnMove.MovementType.SW:         (-1, -1),
-            GameRules.PawnMove.MovementType.NW:         (-1, 1),
+            GameRules.PawnMove.MovementType.NE:         (1, -1),
+            GameRules.PawnMove.MovementType.SE:         (1, 1),
+            GameRules.PawnMove.MovementType.SW:         (-1, 1),
+            GameRules.PawnMove.MovementType.NW:         (-1, -1),
         }
 
 
@@ -347,11 +340,11 @@ class GameRules:
         return None
     
     @staticmethod
-    def movement_to_delta(delta) -> Tuple:
+    def movement_to_delta(movement) -> Tuple:
         lookup = GameRules._movement_to_delta_dict()
 
-        if delta in lookup:
-            return lookup[delta]
+        if movement in lookup:
+            return lookup[movement]
         
         return None
     
@@ -405,7 +398,7 @@ class GameRules:
 
         for move_type, handler in self._movement_to_handler_dict().items():
             if handler(position):
-                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.ABSOLUTE, position=(position + self.movement_to_delta(move_type)))
+                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.RELATIVE, movement=move_type)
                 valid_moves.add(new_move)
 
         return valid_moves
