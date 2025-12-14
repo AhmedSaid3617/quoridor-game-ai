@@ -17,3 +17,6 @@ class Path:
             t = current_position + GameRules.movement_to_delta(move.movement)
             current_position = GameState.Position(t[0], t[1])
         return current_position
+    
+    def length(self) -> int:
+        return len(self.path)

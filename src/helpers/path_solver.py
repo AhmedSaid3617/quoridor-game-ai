@@ -54,10 +54,10 @@ class PathSolver:
         bfs_queue = []
         paths = []
 
-        rules = GameRules(game_state.get_biased_for_player(my_state.player_one if player == GameState.Player.PLAYER_TWO else my_state.player_two))
+        rules = GameRules(game_state.get_biased_for_player(GameState.Player.PLAYER_ONE if player == GameState.Player.PLAYER_TWO else GameState.Player.PLAYER_TWO))
         state_controller = StateController(game_state)
 
-        initial_pos = state_controller.get_player_position(player, game_state)
+        initial_pos = state_controller.get_player_position(player)
         bfs_queue.append(Path(start=initial_pos, path=[]))
 
         min_dist[initial_pos.y][initial_pos.x] = 0
@@ -90,7 +90,7 @@ class PathSolver:
             available_moves = rules.all_pown_moves_absolute_using_position(player, current_pos)
 
             for move in available_moves:
-                dx, dy = rules.movement_to_delta(move)
+                dx, dy = rules.movement_to_delta(move.movement)
                 nx, ny = current_pos.x + dx, current_pos.y + dy
 
                 new_len = current_len + 1
