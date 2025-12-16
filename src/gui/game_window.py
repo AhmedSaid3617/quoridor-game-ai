@@ -8,13 +8,10 @@ from PyQt6.QtCore import Qt
 from src.gui.board_view import BoardWidget
 from src.controller.game_controller import GameController
 from src.state.game_state import GameState
-
+from src.agent.agent import Agent
+from src.agent.mock_agent import MockAgent
 
 class GameWindow(QMainWindow):
-
-    class GameMode(Enum):
-        HUMAN = 1
-        AI = 2
 
     def __init__(self):
         super().__init__()
@@ -118,8 +115,18 @@ class GameWindow(QMainWindow):
         self.game_started = True
 
         # Update the board view with the new game state
-        self.board.set_game_state(self.game_state)
-        self.board.set_controller(self.controller)
+        agent = None
+        if self.mode == "AI":
+            difficulty = Agent.AgentDifficulty.EASY
+            if self.difficulty == "Medium":
+                difficulty = Agent.AgentDifficulty.MEDIUM
+            elif self.difficulty == "Hard":
+                difficulty = Agent.AgentDifficulty.HARD
+
+            agent = MockAgent(difficulty=difficulty, maximize=GameState.Player.PLAYER_TWO, state=self.game_state)
+
+
+        self.board.start_game(self.game_state, self.controller, self.mode, agent)
         
         # Connect signal to update info when game state changes
         self.board.game_state_changed.connect(self.update_info)
@@ -163,16 +170,17 @@ class GameWindow(QMainWindow):
         self.difficulty = None
         self.game_state = None
         self.controller = None
+        self.board.reset_board()
         #self.board.controller = None
         self.update_info()
 
     def set_human_mode(self):
-        self.mode = self.GameMode.HUMAN
+        self.mode = "Human"
         self.difficulty = None
         self.start_game()
 
     def set_ai_mode(self):
-        self.mode = self.GameMode.AI
+        self.mode = "AI"
         self.difficulty = self.ai_difficulty.currentIndex() + 1  # Enum starts at 1
         self.ai_player_id=2  # AI plays as Blue
         self.start_game()

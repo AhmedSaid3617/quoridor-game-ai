@@ -36,11 +36,3 @@ class GameController:
                 
         else:
             raise ValueError("Unknown move type")
-        
-
-    def _flip_active_player(self):
-        if self.current_player == GameState.Player.PLAYER_ONE:
-            self.current_player = GameState.Player.PLAYER_TWO
-            
-        elif self.current_player == GameState.Player.PLAYER_TWO:
-            self.current_player = GameState.Player.PLAYER_ONE
