@@ -6,3 +6,6 @@ pluggy==1.6.0
 Pygments==2.19.2
 pytest==9.0.1
 pytest-cov==7.0.0
+PyQt6==6.10.1
+PyQt6-Qt6==6.10.1
+PyQt6_sip==13.10.3

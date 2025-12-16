@@ -9,56 +9,6 @@ from src.gui.board_view import BoardWidget
 from src.controller.game_controller import GameController
 from src.state.game_state import GameState
 
-# TODO: Remove this function and use actual game initialization in production
-def game_state_init_test(game_state):
-    """Initialize the game state for testing purposes."""
-
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(0,0))
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(2, 3))
-    
-
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(5, 5))
-   
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(3, 5))
-
-    
-    """ expected_horizontal_edges = np.array([
-        [1, 1, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]).astype(bool).tolist() """
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 3))
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(4, 4))
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 0))
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(4, 2))
-
-    """
-        expected_vertical_edges = np.array([
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 1, 0, 1, 0, 0, 0],
-            [0, 0, 1, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-        ]).astype(bool).tolist()
-    """
-
 
 class GameWindow(QMainWindow):
 
@@ -171,8 +121,8 @@ class GameWindow(QMainWindow):
         self.board.set_game_state(self.game_state)
         self.board.set_controller(self.controller)
         
-        # TODO: likely need to remove this
-        self.board.update()
+        # Connect signal to update info when game state changes
+        self.board.game_state_changed.connect(self.update_info)
 
         self.update_info()
 
@@ -180,18 +130,26 @@ class GameWindow(QMainWindow):
     def update_info(self):
         """Update the info label with turn, walls, mode, and AI difficulty."""
         if self.game_started and self.game_state and self.controller:
-            # Game is running
-            active_color = "Red" if self.game_state.active_player == 1 else "Blue"
-            mode_text = f"Mode: {self.mode}"
-            if self.mode == "AI":
-                mode_text += f" ({self.difficulty})"
 
-            info_text = (
-                f"Turn: {active_color} | "
-                f"Red walls: {self.game_state.player_one_remaining_walls} | "
-                f"Blue walls: {self.game_state.player_two_remaining_walls} | "
-                f"{mode_text}"
-            )
+            # Game over.
+            if self.controller.check_winner() is not None:
+                winner = self.controller.check_winner()
+                winner_color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
+                info_text = f"Game Over! {winner_color} wins! | Select Play Again to restart."
+
+            # Game is running
+            else:
+                active_color = "Red" if self.game_state.active_player == GameState.Player.PLAYER_ONE else "Blue"
+                mode_text = f"Mode: {self.mode}"
+                if self.mode == "AI":
+                    mode_text += f" ({self.difficulty})"
+
+                info_text = (
+                    f"Turn: {active_color} | "
+                    f"Red walls: {self.game_state.player_one_remaining_walls} | "
+                    f"Blue walls: {self.game_state.player_two_remaining_walls} | "
+                    f"{mode_text}"
+                )
         else:
             # Game not started
             info_text = "Game not started | Select Human or AI mode"

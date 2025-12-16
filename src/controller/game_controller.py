@@ -25,16 +25,22 @@ class GameController:
         if isinstance(move, GameRules.PawnMove):
             if self.rules.can_apply_pawn_move(move, self.game_state.active_player):     # If this player can move to this position.
                 self.state_controller.apply_pawn_move(self.game_state.active_player, move)
+                #self._flip_active_player()
                 return True
             
         elif isinstance(move, GameRules.WallMove):
             if self.rules.can_apply_wall_move(self.game_state.active_player, move): # If this player can play this wall move.
                 self.state_controller.apply_wall_move(self.game_state.active_player, move)
+                #self._flip_active_player()
                 return True
                 
         else:
             raise ValueError("Unknown move type")
         
 
-        
-        return False
+    def _flip_active_player(self):
+        if self.current_player == GameState.Player.PLAYER_ONE:
+            self.current_player = GameState.Player.PLAYER_TWO
+            
+        elif self.current_player == GameState.Player.PLAYER_TWO:
+            self.current_player = GameState.Player.PLAYER_ONE

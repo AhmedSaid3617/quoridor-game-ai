@@ -1,7 +1,7 @@
 # gui/board_view.py
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPainter, QPen, QColor
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QLabel
 
@@ -12,6 +12,9 @@ from src.state.game_state import GameState
 BOARD_SIZE = 9
 
 class BoardWidget(QWidget):
+    # Signal emitted when game state changes
+    game_state_changed = pyqtSignal()
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumSize(BOARD_SIZE * 50, BOARD_SIZE * 50)
@@ -35,6 +38,7 @@ class BoardWidget(QWidget):
         self.current_wall_orientation = "H"
         self.game_state = GameState()
         self.controller = None
+        
 
 
     def set_game_state(self, game_state: GameState):
@@ -138,6 +142,9 @@ class BoardWidget(QWidget):
             winner = self.controller.check_winner()
             color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
             self.show_message(f"{color} wins!", 3000)
+            self.controller = None
+
+        
                     
                     
         """ wall_thickness = int(cell_size / 5)
@@ -172,6 +179,7 @@ class BoardWidget(QWidget):
         if a0.button() == Qt.MouseButton.LeftButton:
             pawn_move = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(row,col))
             self.controller.apply_move(pawn_move)
+            self.game_state_changed.emit()
 
         elif a0.button() == Qt.MouseButton.RightButton:
             wall_move = GameRules.WallMove(
@@ -179,6 +187,7 @@ class BoardWidget(QWidget):
                 position=GameState.Position(row, col)
             )
             self.controller.apply_move(wall_move)
+            self.game_state_changed.emit()
 
         self.update()
 
@@ -197,26 +206,26 @@ class BoardWidget(QWidget):
         QTimer.singleShot(duration, self.message_label.hide)
 
     def mouseMoveEvent(self, a0):
-        pass
-        cell_size = min(self.width(), self.height()) / BOARD_SIZE  # same as paintEvent
-        x = a0.position().x()
-        y = a0.position().y()
-        row = int(y // cell_size)
-        col = int(x // cell_size)
+        if self.controller:
+            cell_size = min(self.width(), self.height()) / BOARD_SIZE  # same as paintEvent
+            x = a0.position().x()
+            y = a0.position().y()
+            row = int(y // cell_size)
+            col = int(x // cell_size)
 
-        # Only allow hover inside the board
-        if 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE:
-            self.hovered_cell = (row, col)
-        else:
-            self.hovered_cell = None
+            # Only allow hover inside the board
+            if 0 <= row < BOARD_SIZE and 0 <= col < BOARD_SIZE:
+                self.hovered_cell = (row, col)
+            else:
+                self.hovered_cell = None
 
-        # Update cursor if hovering over a legal move
-        if self.hovered_cell in [(m.row, m.col) for m in self.legal_moves]:
-            self.setCursor(Qt.CursorShape.PointingHandCursor)
-        else:
-            self.setCursor(Qt.CursorShape.ArrowCursor)
+            # Update cursor if hovering over a legal move
+            if self.hovered_cell in [(m.row, m.col) for m in self.legal_moves]:
+                self.setCursor(Qt.CursorShape.PointingHandCursor)
+            else:
+                self.setCursor(Qt.CursorShape.ArrowCursor)
 
-        self.update()
+            self.update()
     
     # TODO: I will likely eliminate this.
     def keyPressEvent(self, a0):
@@ -227,10 +236,10 @@ class BoardWidget(QWidget):
         # Change wall orientation
         if a0.key() == Qt.Key.Key_H:
             self.current_wall_orientation = "H"
-            self.show_message("Wall orientation: Horizontal", 1000)
+            self.show_message("Wall orientation: Horizontal", 400)
         elif a0.key() == Qt.Key.Key_V:
             self.current_wall_orientation = "V"
-            self.show_message("Wall orientation: Vertical", 1000)
+            self.show_message("Wall orientation: Vertical", 400)
         """
         # WASD / arrow keys for pawn movement
         player = self.controller.game_state.players[self.controller.game_state.active_player]

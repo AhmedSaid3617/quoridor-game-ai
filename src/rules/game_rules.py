@@ -274,17 +274,15 @@ class GameRules:
                 return False
         else:
             return False
-    
-    
-    
+
     
     def can_apply_pawn_move(self, pawn_move:PawnMove, player:GameState.Player) -> bool:
         if pawn_move.system == GameRules.PawnMove.SystemType.ABSOLUTE: # change to relative
             movement = None # should not be ABSOLUTE
             if (player == GameState.Player.PLAYER_ONE):
-                delta = self.game_state.player_one - pawn_move.position
+                delta = pawn_move.position - self.game_state.player_one
             elif (player  == GameState.Player.PLAYER_TWO):
-                delta = self.game_state.player_two - pawn_move.position
+                delta = pawn_move.position - self.game_state.player_two
 
             movement = self._delta_to_movement(delta)
 
@@ -314,7 +312,7 @@ class GameRules:
     
     
     @staticmethod
-    def _movement_to_delta_dict() -> Tuple:
+    def _movement_to_delta_dict() -> dict[PawnMove.MovementType, tuple[int, int]]:
         return {
             GameRules.PawnMove.MovementType.UP:         (0, -1),
             GameRules.PawnMove.MovementType.JUMP_UP:    (0, -2),
