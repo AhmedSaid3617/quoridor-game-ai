@@ -10,3 +10,4 @@ omit =
     src/rules/game_rules.py
     src/gui/board_view.py
     src/gui/game_window.py
+    src/agent/mock_agent.py
