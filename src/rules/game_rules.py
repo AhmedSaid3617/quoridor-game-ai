@@ -379,6 +379,7 @@ class GameRules:
 
         return valid_moves
     
+    # TODO: fix.
     def all_pawn_moves_absolute(self, player: GameState.Player) -> Set[PawnMove]:
         position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
         valid_moves = set()

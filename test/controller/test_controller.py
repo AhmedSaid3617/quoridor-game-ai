@@ -269,5 +269,85 @@ class TestGameController(unittest.TestCase):
         self.assertLess(self.game_state.player_one_remaining_walls, 10)
 
 
+    def test_pawn_move_undo(self):
+        # Move each player forward for 3 plays.
+        move1 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 7))
+        move2 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 1))
+        move3 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 6))
+
+        self.controller.apply_move(move1)
+        self.controller.apply_move(move2)
+        self.controller.apply_move(move3)
+
+        self.controller.undo()  # Undo Player One's move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 7))
+
+        self.controller.undo()  # Undo Player Two's move.
+        self.assertEqual(self.game_state.player_two, GameState.Position(4, 0))
+
+        self.controller.undo()  # Undo Player One's first move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 8))
+
+    def test_pawn_move_redo(self):
+        # Move each player forward for 2 plays.
+        move1 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 7))
+        move2 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 1))
+
+        self.controller.apply_move(move1)
+        self.controller.apply_move(move2)
+
+        self.controller.undo()  # Undo Player Two's move.
+        self.assertEqual(self.game_state.player_two, GameState.Position(4, 0))
+
+        self.controller.undo()  # Undo Player One's move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 8))
+
+        self.controller.redo()  # Redo Player One's move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 7))
+
+        self.controller.redo()  # Redo Player Two's move.
+        self.assertEqual(self.game_state.player_two, GameState.Position(4, 1))
+
+    def test_wall_move_undo_redo(self):
+        move1 = GameRules.WallMove(wall=GameState.Wall.HORIZONTAL, position=GameState.Position(2, 2))
+        move2 = GameRules.WallMove(wall=GameState.Wall.VERTICAL, position=GameState.Position(4, 4))
+
+        self.controller.apply_move(move1)
+        self.controller.apply_move(move2)
+
+        self.controller.undo()  # Undo Player Two's wall.
+        self.assertFalse(self.game_state.vertical_edges[4][4])
+        self.assertFalse(self.game_state.vertical_edges[5][4])
+        self.assertEqual(self.game_state.player_two_remaining_walls, 10)
+
+        self.controller.undo()  # Undo Player One's wall.
+        self.assertFalse(self.game_state.horizontal_edges[2][2])
+        self.assertFalse(self.game_state.horizontal_edges[2][3])
+        self.assertEqual(self.game_state.player_one_remaining_walls, 10)
+
+        self.controller.redo()  # Redo Player One's wall.
+        self.assertTrue(self.game_state.horizontal_edges[2][2])
+        self.assertTrue(self.game_state.horizontal_edges[2][3])
+        self.assertEqual(self.game_state.player_one_remaining_walls, 9)
+
+        self.controller.redo()  # Redo Player Two's wall.
+        self.assertTrue(self.game_state.vertical_edges[4][4])
+        self.assertTrue(self.game_state.vertical_edges[5][4])
+        self.assertEqual(self.game_state.player_two_remaining_walls, 9)
+
+    def test_undo_beyond_initial_state_raises_error(self):
+        with self.assertRaises(IndexError, msg="No more moves to undo."):
+            self.controller.undo()  # No moves made yet.
+    
+    def test_undo_play_undo_raises_error(self):
+        move1 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 7))
+        self.controller.apply_move(move1)
+
+        self.controller.undo()  # Undo the move.
+
+        with self.assertRaises(IndexError, msg="No more moves to undo."):
+            self.controller.undo()  # No more moves to undo.
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -64,10 +64,10 @@ class GameWindow(QMainWindow):
         self.ai_player_id=1
         self.ai_button.clicked.connect(self.set_ai_mode)
         self.undo_button = QPushButton("Undo")
-        #self.undo_button.clicked.connect(lambda: self.controller.undo())
+        self.undo_button.clicked.connect(self.handle_undo)
 
         self.redo_button = QPushButton("Redo")
-        #self.redo_button.clicked.connect(lambda: self.controller.redo())
+        self.redo_button.clicked.connect(self.handle_redo)
 
         self.ai_difficulty = QComboBox()
         self.ai_difficulty.addItems(["Easy", "Medium", "Hard"])
@@ -184,5 +184,23 @@ class GameWindow(QMainWindow):
         self.difficulty = self.ai_difficulty.currentIndex() + 1  # Enum starts at 1
         self.ai_player_id=2  # AI plays as Blue
         self.start_game()
+
+    def handle_undo(self):
+        if self.controller:
+            try:
+                self.controller.undo()
+                self.update_info()
+                self.board.update()  # Refresh the board view
+            except IndexError:
+                pass  # No more moves to undo
+
+    def handle_redo(self):
+        if self.controller:
+            try:
+                self.controller.redo()
+                self.update_info()
+                self.board.update()  # Refresh the board view
+            except IndexError:
+                pass  # No more moves to redo
     
 

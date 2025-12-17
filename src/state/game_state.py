@@ -97,6 +97,9 @@ class GameState:
         new_state = GameState()
         new_state.player_one = self.player_one.__copy__()
         new_state.player_two = self.player_two.__copy__()
+        new_state.player_one_remaining_walls = self.player_one_remaining_walls
+        new_state.player_two_remaining_walls = self.player_two_remaining_walls
+        new_state.active_player = self.active_player
         new_state.vertical_edges = [row[:] for row in self.vertical_edges]
         new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
         return new_state
