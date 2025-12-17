@@ -278,15 +278,19 @@ class TestGameController(unittest.TestCase):
         self.controller.apply_move(move1)
         self.controller.apply_move(move2)
         self.controller.apply_move(move3)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
 
         self.controller.undo()  # Undo Player One's move.
         self.assertEqual(self.game_state.player_one, GameState.Position(4, 7))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
         self.controller.undo()  # Undo Player Two's move.
         self.assertEqual(self.game_state.player_two, GameState.Position(4, 0))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
 
         self.controller.undo()  # Undo Player One's first move.
         self.assertEqual(self.game_state.player_one, GameState.Position(4, 8))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
     def test_pawn_move_redo(self):
         # Move each player forward for 2 plays.
@@ -295,18 +299,23 @@ class TestGameController(unittest.TestCase):
 
         self.controller.apply_move(move1)
         self.controller.apply_move(move2)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
         self.controller.undo()  # Undo Player Two's move.
         self.assertEqual(self.game_state.player_two, GameState.Position(4, 0))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
 
         self.controller.undo()  # Undo Player One's move.
         self.assertEqual(self.game_state.player_one, GameState.Position(4, 8))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
         self.controller.redo()  # Redo Player One's move.
         self.assertEqual(self.game_state.player_one, GameState.Position(4, 7))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
 
         self.controller.redo()  # Redo Player Two's move.
         self.assertEqual(self.game_state.player_two, GameState.Position(4, 1))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
     def test_wall_move_undo_redo(self):
         move1 = GameRules.WallMove(wall=GameState.Wall.HORIZONTAL, position=GameState.Position(2, 2))
@@ -314,26 +323,31 @@ class TestGameController(unittest.TestCase):
 
         self.controller.apply_move(move1)
         self.controller.apply_move(move2)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
         self.controller.undo()  # Undo Player Two's wall.
         self.assertFalse(self.game_state.vertical_edges[4][4])
         self.assertFalse(self.game_state.vertical_edges[5][4])
         self.assertEqual(self.game_state.player_two_remaining_walls, 10)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
 
         self.controller.undo()  # Undo Player One's wall.
         self.assertFalse(self.game_state.horizontal_edges[2][2])
         self.assertFalse(self.game_state.horizontal_edges[2][3])
         self.assertEqual(self.game_state.player_one_remaining_walls, 10)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
         self.controller.redo()  # Redo Player One's wall.
         self.assertTrue(self.game_state.horizontal_edges[2][2])
         self.assertTrue(self.game_state.horizontal_edges[2][3])
         self.assertEqual(self.game_state.player_one_remaining_walls, 9)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
 
         self.controller.redo()  # Redo Player Two's wall.
         self.assertTrue(self.game_state.vertical_edges[4][4])
         self.assertTrue(self.game_state.vertical_edges[5][4])
         self.assertEqual(self.game_state.player_two_remaining_walls, 9)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
     def test_undo_beyond_initial_state_raises_error(self):
         with self.assertRaises(IndexError, msg="No more moves to undo."):

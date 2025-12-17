@@ -64,5 +64,6 @@ class GameController:
         to_state.player_two = from_state.player_two.__copy__()
         to_state.player_one_remaining_walls = from_state.player_one_remaining_walls
         to_state.player_two_remaining_walls = from_state.player_two_remaining_walls
+        to_state.active_player = from_state.active_player
         to_state.vertical_edges = [row[:] for row in from_state.vertical_edges]
         to_state.horizontal_edges = [row[:] for row in from_state.horizontal_edges]

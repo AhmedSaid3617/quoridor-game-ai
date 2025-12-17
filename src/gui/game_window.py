@@ -186,7 +186,7 @@ class GameWindow(QMainWindow):
         self.start_game()
 
     def handle_undo(self):
-        if self.controller:
+        if self.mode == "Human" and self.controller:
             try:
                 self.controller.undo()
                 self.update_info()
@@ -195,7 +195,7 @@ class GameWindow(QMainWindow):
                 pass  # No more moves to undo
 
     def handle_redo(self):
-        if self.controller:
+        if self.mode == "Human" and self.controller:
             try:
                 self.controller.redo()
                 self.update_info()

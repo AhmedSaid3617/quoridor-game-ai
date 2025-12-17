@@ -87,22 +87,26 @@ class BoardWidget(QWidget):
         painter.setBrush(QColor(255, 0, 0, 70))
         painter.setPen(Qt.PenStyle.NoPen)
 
-        # --- Hover
-        if self.hovered_cell:
-            row, col = self.hovered_cell
-            # TODO: draw wall preview
-            self.paint_wall(painter, row, col, self.current_wall_orientation, cell_size)
+        if self.controller:
+            # --- Hover
+            if self.hovered_cell:
+                row, col = self.hovered_cell
+                # TODO: draw wall preview
+                self.paint_wall(painter, row, col, self.current_wall_orientation, cell_size)
 
-        rules_1 = GameRules(self.game_state.get_biased_for_player(GameState.Player.PLAYER_ONE if self.game_state.active_player == GameState.Player.PLAYER_TWO else GameState.Player.PLAYER_TWO))
-        self.legal_moves = rules_1.all_pawn_moves_absolute(self.game_state.active_player)
-        # --- Legal moves
-        painter.setBrush(QColor(0, 255, 0, 120))  # green
-        painter.setPen(Qt.PenStyle.NoPen)
-        for move in self.legal_moves:
-            x = move.position[0] * cell_size
-            y = move.position[1] * cell_size
-            painter.drawEllipse(int(x + cell_size/4), int(y + cell_size/4),
-                                int(cell_size/2), int(cell_size/2))
+            # --- Legal moves
+            rules_1 = GameRules(self.game_state.get_biased_for_player(GameState.Player.PLAYER_ONE if self.game_state.active_player == GameState.Player.PLAYER_TWO else GameState.Player.PLAYER_TWO))
+            self.legal_moves = rules_1.all_pawn_moves_absolute(self.game_state.active_player)
+            if self.game_state.active_player == GameState.Player.PLAYER_ONE:
+                painter.setBrush(QColor(200, 0, 0, 100))  # red
+            else:
+                painter.setBrush(QColor(0, 0, 200, 100))  # blue
+            painter.setPen(Qt.PenStyle.NoPen)
+            for move in self.legal_moves:
+                x = move.position[0] * cell_size
+                y = move.position[1] * cell_size
+                painter.drawEllipse(int(x + cell_size/4), int(y + cell_size/4),
+                                    int(cell_size/2), int(cell_size/2))
 
         # draw pawns
         if self.game_state:
