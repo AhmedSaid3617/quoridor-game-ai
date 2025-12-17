@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from enum import Enum
-from typing import Tuple
+from typing import Set, Tuple
 from src.state import GameState
+from src.state.game_state import GameStateBiased
 
 class GameRules:
     class Move:
@@ -41,6 +42,12 @@ class GameRules:
                 return f"Move to {self.position}"
             else:
                 return f"Move {str.lower(self.movement.value)}"
+            
+        def __eq__(self, other):
+            return self.system == other.system and (self.movement == other.movement or self.position == other.position)
+        
+        def __hash__(self):
+            return hash((self.system, self.movement)) if self.system == self.SystemType.RELATIVE  else hash((self.system, self.position))
     
     """
     Placement of a wall (vertical or horizontal).
@@ -55,7 +62,9 @@ class GameRules:
             return f"Place {str.lower(self.wall.value)} wall at {self.position}"               
 
 
-    def __init__(self, game_state: GameState = GameState()):
+    def __init__(self, game_state: GameStateBiased):
+        if not isinstance(game_state, GameStateBiased):
+            raise ValueError("Need a biased game state to know the position of opponent")
         self.game_state = game_state
 
 
@@ -72,19 +81,8 @@ class GameRules:
         )
 
     def _get_current_and_opponent_positions(self, position: GameState.Position):
-        """
-        Returns (current_player_position, opponent_player_position) based on the input position.
-        If the position does not match either player, current_player is the input position, opponent is None.
-        """
-        _, player_one_pos, _, player_two_pos = self._get_players_info()
-        if position == player_one_pos:
-            return player_one_pos, player_two_pos
-        elif position == player_two_pos:
-            return player_two_pos, player_one_pos
-        else:
-            return position, None
+        return position, self.game_state.opponent
 
-    # TODO: implement special cases, hitting a player
 ###################################### Regular moves ######################################
     def _can_move_up(self, position: GameState.Position) -> bool:
         current_player, opponent_player = self._get_current_and_opponent_positions(position)
@@ -276,17 +274,15 @@ class GameRules:
                 return False
         else:
             return False
-    
-    
-    
+
     
     def can_apply_pawn_move(self, pawn_move:PawnMove, player:GameState.Player) -> bool:
         if pawn_move.system == GameRules.PawnMove.SystemType.ABSOLUTE: # change to relative
             movement = None # should not be ABSOLUTE
             if (player == GameState.Player.PLAYER_ONE):
-                delta = self.game_state.player_one - pawn_move.position
+                delta = pawn_move.position - self.game_state.player_one
             elif (player  == GameState.Player.PLAYER_TWO):
-                delta = self.game_state.player_two - pawn_move.position
+                delta = pawn_move.position - self.game_state.player_two
 
             movement = self._delta_to_movement(delta)
 
@@ -316,16 +312,18 @@ class GameRules:
     
     
     @staticmethod
-    def _movement_to_delta_dict() -> Tuple:
+    def _movement_to_delta_dict() -> dict[PawnMove.MovementType, tuple[int, int]]:
         return {
-            GameRules.PawnMove.MovementType.UP:    (0, 1),
-            GameRules.PawnMove.MovementType.DOWN:  (0, -1),
-            GameRules.PawnMove.MovementType.LEFT:  (-1, 0),
-            GameRules.PawnMove.MovementType.RIGHT: (1, 0),
-            GameRules.PawnMove.MovementType.NE:    (1, 1),
-            GameRules.PawnMove.MovementType.SE:    (1, -1),
-            GameRules.PawnMove.MovementType.SW:    (-1, -1),
-            GameRules.PawnMove.MovementType.NW:    (-1, 1),
+            GameRules.PawnMove.MovementType.UP:         (0, -1),
+            GameRules.PawnMove.MovementType.JUMP_UP:    (0, -2),
+            GameRules.PawnMove.MovementType.DOWN:       (0, 1),
+            GameRules.PawnMove.MovementType.JUMP_DOWN:  (0, 2),
+            GameRules.PawnMove.MovementType.LEFT:       (-1, 0),
+            GameRules.PawnMove.MovementType.RIGHT:      (1, 0),
+            GameRules.PawnMove.MovementType.NE:         (1, -1),
+            GameRules.PawnMove.MovementType.SE:         (1, 1),
+            GameRules.PawnMove.MovementType.SW:         (-1, 1),
+            GameRules.PawnMove.MovementType.NW:         (-1, -1),
         }
 
 
@@ -340,28 +338,66 @@ class GameRules:
         return None
     
     @staticmethod
-    def movement_to_delta(delta) -> Tuple:
+    def movement_to_delta(movement) -> Tuple:
         lookup = GameRules._movement_to_delta_dict()
 
-        if delta in lookup:
-            return lookup[delta]
+        if movement in lookup:
+            return lookup[movement]
         
         return None
     
-    def _can_handler(self, movement, position):
-        handlers = {
-            GameRules.PawnMove.MovementType.UP:    self._can_move_up,
-            GameRules.PawnMove.MovementType.RIGHT: self._can_move_right,
-            GameRules.PawnMove.MovementType.DOWN:  self._can_move_down,
-            GameRules.PawnMove.MovementType.LEFT:  self._can_move_left,
-            GameRules.PawnMove.MovementType.NE:    self._can_move_ne,
-            GameRules.PawnMove.MovementType.SE:    self._can_move_se,
-            GameRules.PawnMove.MovementType.SW:    self._can_move_sw,
-            GameRules.PawnMove.MovementType.NW:    self._can_move_nw,
-            # TODO: others
+    def _movement_to_handler_dict(self):
+        return {
+            GameRules.PawnMove.MovementType.UP:         self._can_move_up,
+            GameRules.PawnMove.MovementType.JUMP_UP:    self._can_jump_up,
+            GameRules.PawnMove.MovementType.RIGHT:      self._can_move_right,
+            GameRules.PawnMove.MovementType.DOWN:       self._can_move_down,
+            GameRules.PawnMove.MovementType.JUMP_DOWN:  self._can_jump_down,
+            GameRules.PawnMove.MovementType.LEFT:       self._can_move_left,
+            GameRules.PawnMove.MovementType.NE:         self._can_move_ne,
+            GameRules.PawnMove.MovementType.SE:         self._can_move_se,
+            GameRules.PawnMove.MovementType.SW:         self._can_move_sw,
+            GameRules.PawnMove.MovementType.NW:         self._can_move_nw,
         }
+
+    def _can_handler(self, movement, position):
+        handlers = self._movement_to_handler_dict()
 
         if movement in handlers:
             return handlers[movement](position)
         
         raise ValueError(f"Invalid pawn movement: {movement}")
+    
+    def all_pawn_moves_relative(self, player: GameState.Player) -> Set[PawnMove]:
+        position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+        valid_moves = set()
+
+        for move_type, handler in self._movement_to_handler_dict().items():
+            if handler(position):
+                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.RELATIVE, movement=move_type)
+                valid_moves.add(new_move)
+
+        return valid_moves
+    
+    def all_pawn_moves_absolute(self, player: GameState.Player) -> Set[PawnMove]:
+        position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+        valid_moves = set()
+
+        for move_type, handler in self._movement_to_handler_dict().items():
+            if handler(position):
+                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.ABSOLUTE, position=(position + self.movement_to_delta(move_type)))
+                valid_moves.add(new_move)
+
+        return valid_moves
+    #get all pawn movies absolute using the player and current position as input
+    def all_pown_moves_absolute_using_position(self,player: GameState.Player,c_position : GameState.Position) -> Set[PawnMove]:
+        position = c_position
+        valid_moves = set()
+
+        for move_type, handler in self._movement_to_handler_dict().items():
+            if handler(position):
+                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.RELATIVE, movement=move_type)
+                valid_moves.add(new_move)
+
+        return valid_moves
+        

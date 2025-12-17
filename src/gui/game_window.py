@@ -8,63 +8,10 @@ from PyQt6.QtCore import Qt
 from src.gui.board_view import BoardWidget
 from src.controller.game_controller import GameController
 from src.state.game_state import GameState
-
-# TODO: Remove this function and use actual game initialization in production
-def game_state_init_test(game_state):
-    """Initialize the game state for testing purposes."""
-
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(0,0))
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(2, 3))
-    
-
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(5, 5))
-   
-    game_state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(3, 5))
-
-    
-    """ expected_horizontal_edges = np.array([
-        [1, 1, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]).astype(bool).tolist() """
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 3))
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(4, 4))
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(2, 0))
-
-
-    game_state.place_wall(GameState.Wall.VERTICAL, GameState.Position(4, 2))
-
-    """
-        expected_vertical_edges = np.array([
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 1, 0, 1, 0, 0, 0],
-            [0, 0, 1, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-        ]).astype(bool).tolist()
-    """
-
+from src.agent.agent import Agent
+from src.agent.mock_agent import MockAgent
 
 class GameWindow(QMainWindow):
-
-    class GameMode(Enum):
-        HUMAN = 1
-        AI = 2
 
     def __init__(self):
         super().__init__()
@@ -168,11 +115,21 @@ class GameWindow(QMainWindow):
         self.game_started = True
 
         # Update the board view with the new game state
-        self.board.set_game_state(self.game_state)
-        self.board.set_controller(self.controller)
+        agent = None
+        if self.mode == "AI":
+            difficulty = Agent.AgentDifficulty.EASY
+            if self.difficulty == "Medium":
+                difficulty = Agent.AgentDifficulty.MEDIUM
+            elif self.difficulty == "Hard":
+                difficulty = Agent.AgentDifficulty.HARD
+
+            agent = MockAgent(difficulty=difficulty, maximize=GameState.Player.PLAYER_TWO, state=self.game_state)
+
+
+        self.board.start_game(self.game_state, self.controller, self.mode, agent)
         
-        # TODO: likely need to remove this
-        self.board.update()
+        # Connect signal to update info when game state changes
+        self.board.game_state_changed.connect(self.update_info)
 
         self.update_info()
 
@@ -180,18 +137,26 @@ class GameWindow(QMainWindow):
     def update_info(self):
         """Update the info label with turn, walls, mode, and AI difficulty."""
         if self.game_started and self.game_state and self.controller:
-            # Game is running
-            active_color = "Red" if self.game_state.active_player == 1 else "Blue"
-            mode_text = f"Mode: {self.mode}"
-            if self.mode == "AI":
-                mode_text += f" ({self.difficulty})"
 
-            info_text = (
-                f"Turn: {active_color} | "
-                f"Red walls: {self.game_state.player_one_remaining_walls} | "
-                f"Blue walls: {self.game_state.player_two_remaining_walls} | "
-                f"{mode_text}"
-            )
+            # Game over.
+            if self.controller.check_winner() is not None:
+                winner = self.controller.check_winner()
+                winner_color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
+                info_text = f"Game Over! {winner_color} wins! | Select Play Again to restart."
+
+            # Game is running
+            else:
+                active_color = "Red" if self.game_state.active_player == GameState.Player.PLAYER_ONE else "Blue"
+                mode_text = f"Mode: {self.mode}"
+                if self.mode == "AI":
+                    mode_text += f" ({self.difficulty})"
+
+                info_text = (
+                    f"Turn: {active_color} | "
+                    f"Red walls: {self.game_state.player_one_remaining_walls} | "
+                    f"Blue walls: {self.game_state.player_two_remaining_walls} | "
+                    f"{mode_text}"
+                )
         else:
             # Game not started
             info_text = "Game not started | Select Human or AI mode"
@@ -205,16 +170,17 @@ class GameWindow(QMainWindow):
         self.difficulty = None
         self.game_state = None
         self.controller = None
+        self.board.reset_board()
         #self.board.controller = None
         self.update_info()
 
     def set_human_mode(self):
-        self.mode = self.GameMode.HUMAN
+        self.mode = "Human"
         self.difficulty = None
         self.start_game()
 
     def set_ai_mode(self):
-        self.mode = self.GameMode.AI
+        self.mode = "AI"
         self.difficulty = self.ai_difficulty.currentIndex() + 1  # Enum starts at 1
         self.ai_player_id=2  # AI plays as Blue
         self.start_game()
