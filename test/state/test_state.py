@@ -254,3 +254,85 @@ class TestStateOperations(unittest.TestCase):
         self.assertEqual(b - a, (5 - 8, -3 - 9))
         self.assertEqual(b + a, (5 + 8, -3 + 9))
         self.assertEqual(a + b, (8 + 5, 9 + -3))
+
+    def test_placing_crossing_walls(self):
+        horizontal_edges = np.array([
+            [0, 0, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]).astype(bool).tolist()
+        self.state.horizontal_edges = horizontal_edges
+        self.assertRaises(ValueError, self.state.place_wall, GameState.Wall.VERTICAL, GameState.Position(2, 3))
+        self.assertRaises(ValueError, self.state.place_wall, GameState.Wall.VERTICAL, GameState.Position(2, 0))
+
+        self.state.place_wall(GameState.Wall.VERTICAL, GameState.Position(1, 2))
+
+
+        for y in range(8):
+            for x in range(8):
+                if (x, y) == (2, 3) or (x, y) == (2,0): # already checked raises errors above
+                    continue
+
+                self.state.vertical_edges = np.array([
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                ]).astype(bool).tolist()
+                self.state.place_wall(GameState.Wall.VERTICAL, GameState.Position(x, y))
+
+
+        self.state.horizontal_edges = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]).astype(bool).tolist()
+
+        self.state.vertical_edges = np.array([
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]).astype(bool).tolist()
+        self.assertRaises(ValueError, self.state.place_wall, GameState.Wall.HORIZONTAL, GameState.Position(2, 3))
+        self.assertRaises(ValueError, self.state.place_wall, GameState.Wall.HORIZONTAL, GameState.Position(2, 0))
+
+        # There is no opposite of assertRaises, just run
+        for y in range(8):
+            for x in range(8):
+                if (x, y) == (2, 3) or (x, y) == (2,0): # already checked raises errors above
+                    continue
+
+                self.state.horizontal_edges = np.array([
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ]).astype(bool).tolist()
+                self.state.place_wall(GameState.Wall.HORIZONTAL, GameState.Position(x, y))
+                
+        

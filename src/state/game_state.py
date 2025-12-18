@@ -71,7 +71,6 @@ class GameState:
             self.player_two = position
             #self.active_player = self.Player.PLAYER_ONE
 
-    # TODO: who decrements the walls?
     def place_wall(self, wall: Wall, position: Position):
         if wall == self.Wall.VERTICAL:
             if position.x < 0 or position.x > 7 or position.y < 0 or position.y > 7:
@@ -80,6 +79,10 @@ class GameState:
             if self.vertical_edges[position.y][position.x] or self.vertical_edges[position.y + 1][position.x]:
                 raise ValueError("Invalid position: a vertical wall blocks placing here")
             
+            # check if causes a cross with a horizontal wall, two other edges on both sides
+            if self.horizontal_edges[position.y][position.x] and self.horizontal_edges[position.y][position.x+1]:
+                raise ValueError("Invalid position: corsses with a horiozontal wall")
+
             self.vertical_edges[position.y][position.x] = True
             self.vertical_edges[position.y + 1][position.x] = True
 
@@ -90,6 +93,10 @@ class GameState:
             if self.horizontal_edges[position.y][position.x] or self.horizontal_edges[position.y][position.x + 1]:
                 raise ValueError("Invalid position: a horizontal wall blocks placing here")
             
+            # check if causes a cross with a vertical wall, two other edges on both sides
+            if self.vertical_edges[position.y + 1][position.x] and self.vertical_edges[position.y][position.x]:
+                raise ValueError("Invalid poition: crosses with a vertical wall")
+
             self.horizontal_edges[position.y][position.x] = True
             self.horizontal_edges[position.y][position.x + 1] = True
 
