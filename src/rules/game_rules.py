@@ -18,9 +18,11 @@ class GameRules:
             UP = "UP"
             JUMP_UP = "JUMP_UP"
             RIGHT = "RIGHT"
+            JUMP_RIGHT = "JUMP_RIGHT"
             DOWN = "DOWN"
             JUMP_DOWN = "JUMP_DOWN"
             LEFT = "LEFT"
+            JUMP_LEFT = "JUMP_LEFT"
             NE = "NE"
             SE = "SE"
             SW = "SW"
@@ -319,7 +321,9 @@ class GameRules:
             GameRules.PawnMove.MovementType.DOWN:       (0, 1),
             GameRules.PawnMove.MovementType.JUMP_DOWN:  (0, 2),
             GameRules.PawnMove.MovementType.LEFT:       (-1, 0),
+            GameRules.PawnMove.MovementType.JUMP_LEFT:  (-2, 0),
             GameRules.PawnMove.MovementType.RIGHT:      (1, 0),
+            GameRules.PawnMove.MovementType.JUMP_RIGHT: (2, 0),
             GameRules.PawnMove.MovementType.NE:         (1, -1),
             GameRules.PawnMove.MovementType.SE:         (1, 1),
             GameRules.PawnMove.MovementType.SW:         (-1, 1),
@@ -351,9 +355,11 @@ class GameRules:
             GameRules.PawnMove.MovementType.UP:         self._can_move_up,
             GameRules.PawnMove.MovementType.JUMP_UP:    self._can_jump_up,
             GameRules.PawnMove.MovementType.RIGHT:      self._can_move_right,
+            GameRules.PawnMove.MovementType.JUMP_RIGHT: self._can_jump_right,
             GameRules.PawnMove.MovementType.DOWN:       self._can_move_down,
             GameRules.PawnMove.MovementType.JUMP_DOWN:  self._can_jump_down,
             GameRules.PawnMove.MovementType.LEFT:       self._can_move_left,
+            GameRules.PawnMove.MovementType.JUMP_LEFT:  self._can_jump_left,
             GameRules.PawnMove.MovementType.NE:         self._can_move_ne,
             GameRules.PawnMove.MovementType.SE:         self._can_move_se,
             GameRules.PawnMove.MovementType.SW:         self._can_move_sw,
@@ -370,6 +376,10 @@ class GameRules:
     
     def all_pawn_moves_relative(self, player: GameState.Player) -> Set[PawnMove]:
         position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+
+        if position == self.game_state.opponent:
+            raise ValueError("This GameRules is biased against this player, can not determine legal moves")
+        
         valid_moves = set()
 
         for move_type, handler in self._movement_to_handler_dict().items():
@@ -381,6 +391,10 @@ class GameRules:
     
     def all_pawn_moves_absolute(self, player: GameState.Player) -> Set[PawnMove]:
         position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+
+        if position == self.game_state.opponent:
+            raise ValueError("This GameRules is biased against this player, can not determine legal moves")
+        
         valid_moves = set()
 
         for move_type, handler in self._movement_to_handler_dict().items():
@@ -392,6 +406,10 @@ class GameRules:
     #get all pawn movies absolute using the player and current position as input
     def all_pown_moves_absolute_using_position(self,player: GameState.Player,c_position : GameState.Position) -> Set[PawnMove]:
         position = c_position
+
+        if position == self.game_state.opponent:
+            raise ValueError("This GameRules is biased against this player, can not determine legal moves")
+
         valid_moves = set()
 
         for move_type, handler in self._movement_to_handler_dict().items():

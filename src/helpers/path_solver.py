@@ -18,7 +18,7 @@ class PathSolver:
         visited = [[False for _ in range(9)] for _ in range(9)]
         #bfs queue of pathes
         bfs_queue: List[Path] = []
-        rules = GameRules(game_state.get_biased_for_player(GameState.Player.PLAYER_ONE if player == GameState.Player.PLAYER_TWO else GameState.Player.PLAYER_TWO))
+        rules = GameRules(game_state.get_biased_for_player(player))
         state_controller = StateController(my_state)
         initial_postion = state_controller.get_player_position(player)
         initial_path = Path(start=initial_postion, path=[])
@@ -54,7 +54,7 @@ class PathSolver:
         bfs_queue = []
         paths = []
 
-        rules = GameRules(game_state.get_biased_for_player(GameState.Player.PLAYER_ONE if player == GameState.Player.PLAYER_TWO else GameState.Player.PLAYER_TWO))
+        rules = GameRules(game_state.get_biased_for_player(player))
         state_controller = StateController(game_state)
 
         initial_pos = state_controller.get_player_position(player)
