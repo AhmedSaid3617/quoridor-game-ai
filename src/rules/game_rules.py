@@ -32,25 +32,49 @@ class GameRules:
         class SystemType(Enum):
             RELATIVE = "RELATIVE"
             ABSOLUTE = "ABSOLUTE"
-            
-        def __init__(self, system: SystemType, movement: MovementType = None, position: GameState.Position = None):
+
+        def __init__(
+            self,
+            system: SystemType,
+            movement: MovementType | None = None,
+            position: GameState.Position | None = None,
+        ):
             self.system = system
+
             if system == self.SystemType.RELATIVE:
+                if movement is None:
+                    raise ValueError("RELATIVE move requires movement")
                 self.movement = movement
+                self.position = None
             else:
+                if position is None:
+                    raise ValueError("ABSOLUTE move requires position")
                 self.position = position
+                self.movement = None
 
         def __str__(self):
             if self.system == self.SystemType.ABSOLUTE:
                 return f"Move to {self.position}"
-            else:
-                return f"Move {str.lower(self.movement.value)}"
-            
+            return f"Move {self.movement.value.lower()}"
+
         def __eq__(self, other):
-            return self.system == other.system and (self.movement == other.movement or self.position == other.position)
-        
+            if not isinstance(other, GameRules.PawnMove):
+                return NotImplemented
+
+            if self.system != other.system:
+                return False
+
+            if self.system == self.SystemType.RELATIVE:
+                return self.movement == other.movement
+            else:
+                return self.position == other.position
+
         def __hash__(self):
-            return hash((self.system, self.movement)) if self.system == self.SystemType.RELATIVE  else hash((self.system, self.position))
+            if self.system == self.SystemType.RELATIVE:
+                return hash((self.system, self.movement))
+            else:
+                return hash((self.system, self.position))
+
     
     """
     Placement of a wall (vertical or horizontal).
@@ -63,6 +87,12 @@ class GameRules:
 
         def __str__(self):
             return f"Place {str.lower(self.wall.value)} wall at {self.position}"               
+        
+        def __eq__(self, value):
+            return self.position == value.position and self.wall == value.wall
+        
+        def __hash__(self):
+            return hash((self.position, self.wall))
 
 
     def __init__(self, game_state: GameStateBiased):
@@ -296,7 +326,7 @@ class GameRules:
 
         position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
 
-        return self._can_handler(movement, position)
+        return self.can_handler(movement, position)
 
     def can_apply_wall_move(self, player: GameState.Player, wall_move: WallMove) -> bool:
         # putting it above causes circular import error
@@ -380,7 +410,7 @@ class GameRules:
             GameRules.PawnMove.MovementType.NW:         self._can_move_nw,
         }
 
-    def _can_handler(self, movement, position):
+    def can_handler(self, movement, position):
         handlers = self._movement_to_handler_dict()
 
         if movement in handlers:
@@ -414,7 +444,8 @@ class GameRules:
 
         for move_type, handler in self._movement_to_handler_dict().items():
             if handler(position):
-                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.ABSOLUTE, position=(position + self.movement_to_delta(move_type)))
+                t = position + self.movement_to_delta(move_type)
+                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(t[0], t[1]))
                 valid_moves.add(new_move)
 
         return valid_moves

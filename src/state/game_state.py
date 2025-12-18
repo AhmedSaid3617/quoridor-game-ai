@@ -25,6 +25,9 @@ class GameState:
                 return (self.x + other[0], self.y + other[1])
             
             return (self.x + other.x, self.y + other.y)
+        
+        def __hash__(self):
+            return hash((self.x, self.y))
 
 
     class Player(Enum):

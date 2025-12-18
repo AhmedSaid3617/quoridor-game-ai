@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
+from src.agent.agent_leveled import Agent_leveled
 from src.gui.board_view import BoardWidget
 from src.controller.game_controller import GameController
 from src.state.game_state import GameState
@@ -123,7 +124,7 @@ class GameWindow(QMainWindow):
             elif self.difficulty == "Hard":
                 difficulty = Agent.AgentDifficulty.HARD
 
-            agent = MockAgent(difficulty=difficulty, maximize=GameState.Player.PLAYER_TWO, state=self.game_state)
+            agent = Agent_leveled(difficulty=difficulty, player=GameState.Player.PLAYER_TWO, state=self.game_state)
 
 
         self.board.start_game(self.game_state, self.controller, self.mode, agent)

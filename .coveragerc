@@ -1,13 +1,6 @@
 [report]
 # Temporarily exclude files without 100% coverage
 omit = 
-    src/agent/agent.py
-    src/controller/game_controller.py
-    src/controller/state_controller.py
-    src/helpers/path.py
-    src/helpers/path_solver.py
-    src/helpers/wall_block_solver.py
-    src/rules/game_rules.py
     src/gui/board_view.py
     src/gui/game_window.py
     src/agent/mock_agent.py

@@ -12,9 +12,8 @@ class Agent:
         HARD = "HARD"
 
     # player is the MAX agent
-    def __init__(self, difficulty: AgentDifficulty, maximize: GameState.Player, state: GameState,player:GameState.Player):
+    def __init__(self, difficulty: AgentDifficulty, state: GameState,player:GameState.Player):
         self.difficulty = difficulty
-        self.maximize = maximize
         self.state = state
         self.player=player
 
