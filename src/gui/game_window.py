@@ -182,7 +182,7 @@ class GameWindow(QMainWindow):
 
     def set_ai_mode(self):
         self.mode = "AI"
-        self.difficulty = self.ai_difficulty.currentIndex() + 1  # Enum starts at 1
+        self.difficulty = self.ai_difficulty.currentText()
         self.ai_player_id=2  # AI plays as Blue
         self.start_game()
 

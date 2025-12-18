@@ -15,7 +15,9 @@ class WallBlockSolver:
     True if the move is already blocked,
     or False if blocking is not possible.
     """
-    def solve(self, position: GameState.Position, move: GameRules.PawnMove) -> GameRules.WallMove | bool:
+    def solve(self, position: GameState.Position, move: GameRules.PawnMove) -> List[GameRules.WallMove] | bool:
+        wall_moves = set()
+
         if move.system == GameRules.PawnMove.SystemType.ABSOLUTE:
             raise ValueError("Need a relative move not absolute move")
         
@@ -26,23 +28,23 @@ class WallBlockSolver:
 
             wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
-            
-        if move.movement == GameRules.PawnMove.MovementType.JUMP_UP:
+                wall_moves.add(wall_move)
+  
+        elif move.movement == GameRules.PawnMove.MovementType.JUMP_UP:
             if not rules.can_handler(move.movement, position):
                 return True # No wall blocking needed, already blocked
 
             wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x, position.y - 2))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y - 2))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         elif move.movement == GameRules.PawnMove.MovementType.RIGHT:
             if not rules.can_handler(move.movement, position):
@@ -50,11 +52,11 @@ class WallBlockSolver:
 
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x, position.y))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         elif move.movement == GameRules.PawnMove.MovementType.JUMP_RIGHT:
             if not rules.can_handler(move.movement, position):
@@ -62,11 +64,11 @@ class WallBlockSolver:
 
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x + 1, position.y))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x + 1, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         elif move.movement == GameRules.PawnMove.MovementType.DOWN:
             if not rules.can_handler(move.movement, position):
@@ -74,11 +76,11 @@ class WallBlockSolver:
 
             wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x, position.y))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x - 1, position.y))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
                 
         elif move.movement == GameRules.PawnMove.MovementType.JUMP_DOWN:
             if not rules.can_handler(move.movement, position):
@@ -86,11 +88,11 @@ class WallBlockSolver:
 
             wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x, position.y + 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x - 1, position.y + 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
                         
         elif move.movement == GameRules.PawnMove.MovementType.LEFT:
             if not rules.can_handler(move.movement, position):
@@ -98,23 +100,23 @@ class WallBlockSolver:
 
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
-        elif move.movement == GameRules.PawnMove.MovementType.LEFT:
+        elif move.movement == GameRules.PawnMove.MovementType.JUMP_LEFT:
             if not rules.can_handler(move.movement, position):
                 return True # No wall blocking needed, already blocked
 
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 2, position.y))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 2, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         elif move.movement == GameRules.PawnMove.MovementType.NE:
             if not rules.can_handler(move.movement, position):
@@ -122,7 +124,7 @@ class WallBlockSolver:
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         elif move.movement == GameRules.PawnMove.MovementType.SE:
             if not rules.can_handler(move.movement, position):
@@ -130,7 +132,7 @@ class WallBlockSolver:
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x, position.y + 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         elif move.movement == GameRules.PawnMove.MovementType.SW:
             if not rules.can_handler(move.movement, position):
@@ -138,7 +140,7 @@ class WallBlockSolver:
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y + 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         elif move.movement == GameRules.PawnMove.MovementType.NW:
             if not rules.can_handler(move.movement, position):
@@ -146,12 +148,12 @@ class WallBlockSolver:
             
             wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
-                return wall_move
+                wall_moves.add(wall_move)
             
         else:
-            raise ValueError("Invalid pawn move")    
+            raise ValueError("Invalid pawn move: " + str(move))    
 
-        return False # No wall blocking possible
+        return list(wall_moves)
     
     def solve_optimum_on_path(self, path: Path) -> GameRules.WallMove | bool:
         raise NotImplementedError("Wall blocking check not implemented yet")
@@ -170,9 +172,10 @@ class WallBlockSolver:
                 t = current_position + GameRules.movement_to_delta(move.movement)
                 current_position = GameState.Position(t[0], t[1])
 
-                result = self.solve(current_position, move)
-                if isinstance(result, GameRules.WallMove):
-                    wall_moves.add(result)
+                solution = self.solve(current_position, move)
+                if isinstance(solution, list):
+                    for move in solution:
+                        wall_moves.add(move)
 
 
         return list(wall_moves)

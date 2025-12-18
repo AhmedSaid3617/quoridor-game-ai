@@ -103,8 +103,8 @@ class BoardWidget(QWidget):
                 painter.setBrush(QColor(0, 0, 200, 100))  # blue
             painter.setPen(Qt.PenStyle.NoPen)
             for move in self.legal_moves:
-                x = move.position[0] * cell_size
-                y = move.position[1] * cell_size
+                x = move.position.x * cell_size
+                y = move.position.y * cell_size
                 painter.drawEllipse(int(x + cell_size/4), int(y + cell_size/4),
                                     int(cell_size/2), int(cell_size/2))
 
@@ -203,7 +203,9 @@ class BoardWidget(QWidget):
             self.show_message(f"{color} wins!", 3000)
             self.controller = None
 
-        self.game_state_changed.emit()
+            self.game_state_changed.emit()
+            self.update()
+            return
 
         if self.game_mode == "AI" and self.game_state.active_player == GameState.Player.PLAYER_TWO:
             # Let AI make its move
