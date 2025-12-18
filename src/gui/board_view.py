@@ -194,31 +194,41 @@ class BoardWidget(QWidget):
         self.update()
 
 
-    def apply_move(self, pawn_move):
-        self.controller.apply_move(pawn_move)
+    def apply_move(self, player_move):
 
-        if self.controller and self.controller.check_winner() is not None:
-            winner = self.controller.check_winner()
-            color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
-            self.show_message(f"{color} wins!", 3000)
-            self.controller = None
-
+        if self.controller: # The game is on.
+            self.controller.apply_move(player_move) # Try the player's move.
+            self.update() # Update the board.
             self.game_state_changed.emit()
-            self.update()
-            return
 
-        if self.game_mode == "AI" and self.game_state.active_player == GameState.Player.PLAYER_TWO:
-            # Let AI make its move
-            ai_move = self.ai_agent.decide_move()
-            self.controller.apply_move(ai_move)
-
-            if self.controller and self.controller.check_winner() is not None:
-                winner = self.controller.check_winner()
-                color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
+            winner = self.controller.check_winner() # If someone won then end the game.
+            if winner:
+                color = ""
+                if winner == GameState.Player.PLAYER_ONE:
+                    color = "Red"
+                else:
+                    color = "Blue"
+                
                 self.show_message(f"{color} wins!", 3000)
                 self.controller = None
+                self.game_state_changed.emit()
+                return
+            
 
-            self.game_state_changed.emit()
+            # In case of AI mode, let the AI play.
+            if self.game_mode == "AI" and self.game_state.active_player == GameState.Player.PLAYER_TWO:
+                # Let AI make its move
+                ai_move = self.ai_agent.decide_move()
+                self.controller.apply_move(ai_move)
+
+                # If the AI won, end the game.
+                if self.controller and self.controller.check_winner() is not None:
+                    winner = self.controller.check_winner()
+                    color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
+                    self.show_message(f"{color} wins!", 3000)
+                    self.controller = None
+
+                self.game_state_changed.emit()
 
 
     def show_message(self, text, duration=1000):
