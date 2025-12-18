@@ -318,6 +318,8 @@ class TestGameController(unittest.TestCase):
         self.assertEqual(self.game_state.player_two, GameState.Position(4, 1))
         self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
 
+        self.assertRaises(IndexError, self.controller.redo)
+
     def test_wall_move_undo_redo(self):
         move1 = GameRules.WallMove(wall=GameState.Wall.HORIZONTAL, position=GameState.Position(2, 2))
         move2 = GameRules.WallMove(wall=GameState.Wall.VERTICAL, position=GameState.Position(4, 4))
