@@ -1,3 +1,4 @@
+import copy
 from src.state import GameState
 from src.rules import GameRules
 import unittest
@@ -430,3 +431,62 @@ class TestRulesOperations(unittest.TestCase):
         actual_relative = rules.all_pawn_moves_relative(GameState.Player.PLAYER_ONE)
         
         self.assertEqual(actual_relative, expected_relative)
+
+    def test_wall_placement_not_enough(self):
+        rules = self.rules
+
+        rules.game_state.player_one_remaining_walls = 1
+        rules.game_state.player_two_remaining_walls = 0
+        self.assertTrue(rules.can_apply_wall_move(GameState.Player.PLAYER_ONE, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0))))
+        self.assertFalse(rules.can_apply_wall_move(GameState.Player.PLAYER_TWO, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0))))
+
+        rules.game_state.player_one_remaining_walls = 10
+        rules.game_state.player_two_remaining_walls = 0
+        self.assertTrue(rules.can_apply_wall_move(GameState.Player.PLAYER_ONE, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0))))
+        self.assertFalse(rules.can_apply_wall_move(GameState.Player.PLAYER_TWO, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0))))
+
+        rules.game_state.player_one_remaining_walls = 0
+        rules.game_state.player_two_remaining_walls = 10
+        self.assertFalse(rules.can_apply_wall_move(GameState.Player.PLAYER_ONE, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0))))
+        self.assertTrue(rules.can_apply_wall_move(GameState.Player.PLAYER_TWO, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0))))
+
+    def test_wall_placement_not_affecting_state(self):
+        rules = self.rules
+
+        rules.game_state.player_one_remaining_walls = 1
+        rules.game_state.player_two_remaining_walls = 0
+        before_state = copy.copy(rules.game_state)
+        rules.can_apply_wall_move(GameState.Player.PLAYER_ONE, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0)))
+
+        self.assertEqual(before_state, rules.game_state)
+
+
+    def test_wall_placement_blocked_if_no_path(self):
+        rules = self.rules
+
+        rules.game_state.horizontal_edges = np.array([
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]).astype(bool).tolist()
+
+        rules.game_state.vertical_edges = np.array([
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]).astype(bool).tolist()
+
+        # place such that close the square
+        self.assertFalse(rules.can_apply_wall_move(GameState.Player.PLAYER_TWO, GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(4,1))))
+        self.assertFalse(rules.can_apply_wall_move(GameState.Player.PLAYER_ONE, GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(4,1))))

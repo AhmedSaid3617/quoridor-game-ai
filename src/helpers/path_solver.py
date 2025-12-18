@@ -8,8 +8,8 @@ from src.state.game_state import *
 
 class PathSolver:
     @staticmethod
-    def solve_any(start: GameState.Position, goal_y: int, game_state: GameState) -> Path:
-        return PathSolver.solve_optimum(start, goal_y, game_state)
+    def solve_any(player: GameState.Player, goal_y: int, game_state: GameState) -> Path:
+        return PathSolver.solve_optimum(player, goal_y, game_state)
     
     @staticmethod
     def solve_optimum(player: GameState.Player, goal_y: int, game_state: GameState) -> Path:

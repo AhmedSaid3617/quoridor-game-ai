@@ -109,6 +109,9 @@ class GameState:
         new_state.active_player = self.active_player
         new_state.vertical_edges = [row[:] for row in self.vertical_edges]
         new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
+        new_state.active_player = self.active_player.__copy__()
+        new_state.player_one_remaining_walls = self.player_one_remaining_walls
+        new_state.player_two_remaining_walls = self.player_two_remaining_walls
         return new_state
     
     def get_biased_for_player(self, player: Player):
@@ -131,9 +134,41 @@ class GameState:
         new_state.vertical_edges = [row[:] for row in self.vertical_edges]
         new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
         return new_state
+    
+    def __eq__(self, value: GameState):
+        return  self.active_player == value.active_player and\
+                self.player_one == value.player_one and\
+                self.player_two == value.player_two and\
+                self.player_one_remaining_walls == value.player_one_remaining_walls and\
+                self.player_two_remaining_walls == value.player_two_remaining_walls and\
+                self.horizontal_edges == value.horizontal_edges and\
+                self.vertical_edges == value.vertical_edges
+
 
 
 class GameStateBiased(GameState):
     def __init__(self, opponent: GameState.Position):
         super().__init__()
         self.opponent = opponent
+
+    def __eq__(self, value: GameStateBiased):
+        return  self.active_player == value.active_player and\
+                self.player_one == value.player_one and\
+                self.player_two == value.player_two and\
+                self.player_one_remaining_walls == value.player_one_remaining_walls and\
+                self.player_two_remaining_walls == value.player_two_remaining_walls and\
+                self.horizontal_edges == value.horizontal_edges and\
+                self.vertical_edges == value.vertical_edges and\
+                self.opponent == value.opponent
+    
+    def __copy__(self):
+        new_state = GameState()
+        new_state.player_one = self.player_one.__copy__()
+        new_state.player_two = self.player_two.__copy__()
+        new_state.vertical_edges = [row[:] for row in self.vertical_edges]
+        new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
+        new_state.active_player = self.active_player.__copy__()
+        new_state.player_one_remaining_walls = self.player_one_remaining_walls
+        new_state.player_two_remaining_walls = self.player_two_remaining_walls
+        new_state.opponent = self.opponent
+        return new_state
