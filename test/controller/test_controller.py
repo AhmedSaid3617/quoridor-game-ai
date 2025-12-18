@@ -10,7 +10,7 @@ class TestGameController(unittest.TestCase):
     def setUp(self):
         """Set up a fresh game state and controller before each test."""
         self.game_state = GameState()
-        self.controller = GameController(self.game_state, GameState.Player.PLAYER_ONE)
+        self.controller = GameController(self.game_state)
 
     def tearDown(self):
         """Clean up after each test."""
@@ -21,15 +21,14 @@ class TestGameController(unittest.TestCase):
 
     def test_initialization_player_one_starts(self):
         """Test that controller initializes correctly with Player One starting."""
-        controller = GameController(GameState(), GameState.Player.PLAYER_ONE)
-        self.assertEqual(controller.current_player, GameState.Player.PLAYER_ONE)
+        controller = GameController(GameState())
         self.assertEqual(controller.game_state.active_player, GameState.Player.PLAYER_ONE)
 
     def test_initialization_player_two_starts(self):
         """Test that controller initializes correctly with Player Two starting."""
-        game_state = GameState()
-        controller = GameController(game_state, GameState.Player.PLAYER_TWO)
-        self.assertEqual(controller.current_player, GameState.Player.PLAYER_TWO)
+        game_state = GameState(starting_player=GameState.Player.PLAYER_TWO)
+        controller = GameController(game_state)
+        self.assertEqual(controller.game_state.active_player, GameState.Player.PLAYER_TWO)
 
     # --- Check Winner Tests ---
 
@@ -39,29 +38,31 @@ class TestGameController(unittest.TestCase):
 
     def test_check_winner_player_one_wins(self):
         """Test that Player One wins when reaching y=0."""
-        self.game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(4, 0))
+        self.game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(2, 0))
         winner = self.controller.check_winner()
         self.assertEqual(winner, GameState.Player.PLAYER_ONE)
 
     def test_check_winner_player_two_wins(self):
         """Test that Player Two wins when reaching y=8."""
-        self.game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(4, 8))
+        self.game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(2, 8))
         winner = self.controller.check_winner()
         self.assertEqual(winner, GameState.Player.PLAYER_TWO)
 
     def test_check_winner_player_one_any_column(self):
         """Test that Player One wins at y=0 regardless of x position."""
         for x in range(9):
-            game_state = GameState()
-            controller = GameController(game_state, GameState.Player.PLAYER_ONE)
+            game_state = GameState(GameState.Player.PLAYER_ONE)
+            game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(1, 1)) # place player one away
+            controller = GameController(game_state)
             game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(x, 0))
             self.assertEqual(controller.check_winner(), GameState.Player.PLAYER_ONE)
 
     def test_check_winner_player_two_any_column(self):
         """Test that Player Two wins at y=8 regardless of x position."""
         for x in range(9):
-            game_state = GameState()
-            controller = GameController(game_state, GameState.Player.PLAYER_TWO)
+            game_state = GameState(GameState.Player.PLAYER_TWO)
+            game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(1, 1)) # place player one away
+            controller = GameController(game_state)
             game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(x, 8))
             self.assertEqual(controller.check_winner(), GameState.Player.PLAYER_TWO)
 
@@ -267,6 +268,102 @@ class TestGameController(unittest.TestCase):
         
         # At least some walls should have been placed
         self.assertLess(self.game_state.player_one_remaining_walls, 10)
+
+
+    def test_pawn_move_undo(self):
+        # Move each player forward for 3 plays.
+        move1 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 7))
+        move2 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 1))
+        move3 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 6))
+
+        self.controller.apply_move(move1)
+        self.controller.apply_move(move2)
+        self.controller.apply_move(move3)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
+
+        self.controller.undo()  # Undo Player One's move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 7))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+        self.controller.undo()  # Undo Player Two's move.
+        self.assertEqual(self.game_state.player_two, GameState.Position(4, 0))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
+
+        self.controller.undo()  # Undo Player One's first move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 8))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+    def test_pawn_move_redo(self):
+        # Move each player forward for 2 plays.
+        move1 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 7))
+        move2 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 1))
+
+        self.controller.apply_move(move1)
+        self.controller.apply_move(move2)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+        self.controller.undo()  # Undo Player Two's move.
+        self.assertEqual(self.game_state.player_two, GameState.Position(4, 0))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
+
+        self.controller.undo()  # Undo Player One's move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 8))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+        self.controller.redo()  # Redo Player One's move.
+        self.assertEqual(self.game_state.player_one, GameState.Position(4, 7))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
+
+        self.controller.redo()  # Redo Player Two's move.
+        self.assertEqual(self.game_state.player_two, GameState.Position(4, 1))
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+        self.assertRaises(IndexError, self.controller.redo)
+
+    def test_wall_move_undo_redo(self):
+        move1 = GameRules.WallMove(wall=GameState.Wall.HORIZONTAL, position=GameState.Position(2, 2))
+        move2 = GameRules.WallMove(wall=GameState.Wall.VERTICAL, position=GameState.Position(4, 4))
+
+        self.controller.apply_move(move1)
+        self.controller.apply_move(move2)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+        self.controller.undo()  # Undo Player Two's wall.
+        self.assertFalse(self.game_state.vertical_edges[4][4])
+        self.assertFalse(self.game_state.vertical_edges[5][4])
+        self.assertEqual(self.game_state.player_two_remaining_walls, 10)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
+
+        self.controller.undo()  # Undo Player One's wall.
+        self.assertFalse(self.game_state.horizontal_edges[2][2])
+        self.assertFalse(self.game_state.horizontal_edges[2][3])
+        self.assertEqual(self.game_state.player_one_remaining_walls, 10)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+        self.controller.redo()  # Redo Player One's wall.
+        self.assertTrue(self.game_state.horizontal_edges[2][2])
+        self.assertTrue(self.game_state.horizontal_edges[2][3])
+        self.assertEqual(self.game_state.player_one_remaining_walls, 9)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_TWO)
+
+        self.controller.redo()  # Redo Player Two's wall.
+        self.assertTrue(self.game_state.vertical_edges[4][4])
+        self.assertTrue(self.game_state.vertical_edges[5][4])
+        self.assertEqual(self.game_state.player_two_remaining_walls, 9)
+        self.assertEqual(self.game_state.active_player, GameState.Player.PLAYER_ONE)
+
+    def test_undo_beyond_initial_state_raises_error(self):
+        with self.assertRaises(IndexError, msg="No more moves to undo."):
+            self.controller.undo()  # No moves made yet.
+    
+    def test_undo_play_undo_raises_error(self):
+        move1 = GameRules.PawnMove(GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(4, 7))
+        self.controller.apply_move(move1)
+
+        self.controller.undo()  # Undo the move.
+
+        with self.assertRaises(IndexError, msg="No more moves to undo."):
+            self.controller.undo()  # No more moves to undo.
 
 
 if __name__ == '__main__':

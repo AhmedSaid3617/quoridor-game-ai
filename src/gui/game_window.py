@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
+from src.agent.agent_leveled import Agent_leveled
 from src.gui.board_view import BoardWidget
 from src.controller.game_controller import GameController
 from src.state.game_state import GameState
@@ -64,10 +65,10 @@ class GameWindow(QMainWindow):
         self.ai_player_id=1
         self.ai_button.clicked.connect(self.set_ai_mode)
         self.undo_button = QPushButton("Undo")
-        #self.undo_button.clicked.connect(lambda: self.controller.undo())
+        self.undo_button.clicked.connect(self.handle_undo)
 
         self.redo_button = QPushButton("Redo")
-        #self.redo_button.clicked.connect(lambda: self.controller.redo())
+        self.redo_button.clicked.connect(self.handle_redo)
 
         self.ai_difficulty = QComboBox()
         self.ai_difficulty.addItems(["Easy", "Medium", "Hard"])
@@ -109,7 +110,7 @@ class GameWindow(QMainWindow):
 
         #game_state_init_test(self.game_state)
 
-        self.controller = GameController(self.game_state, GameState.Player.PLAYER_ONE)
+        self.controller = GameController(self.game_state)
         
         # TODO: do i need this?
         self.game_started = True
@@ -123,7 +124,7 @@ class GameWindow(QMainWindow):
             elif self.difficulty == "Hard":
                 difficulty = Agent.AgentDifficulty.HARD
 
-            agent = MockAgent(difficulty=difficulty, maximize=GameState.Player.PLAYER_TWO, state=self.game_state)
+            agent = Agent_leveled(difficulty=difficulty, player=GameState.Player.PLAYER_TWO, state=self.game_state)
 
 
         self.board.start_game(self.game_state, self.controller, self.mode, agent)
@@ -181,8 +182,26 @@ class GameWindow(QMainWindow):
 
     def set_ai_mode(self):
         self.mode = "AI"
-        self.difficulty = self.ai_difficulty.currentIndex() + 1  # Enum starts at 1
+        self.difficulty = self.ai_difficulty.currentText()
         self.ai_player_id=2  # AI plays as Blue
         self.start_game()
+
+    def handle_undo(self):
+        if self.mode == "Human" and self.controller:
+            try:
+                self.controller.undo()
+                self.update_info()
+                self.board.update()  # Refresh the board view
+            except IndexError:
+                pass  # No more moves to undo
+
+    def handle_redo(self):
+        if self.mode == "Human" and self.controller:
+            try:
+                self.controller.redo()
+                self.update_info()
+                self.board.update()  # Refresh the board view
+            except IndexError:
+                pass  # No more moves to redo
     
 

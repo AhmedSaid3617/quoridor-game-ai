@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import copy
 from enum import Enum
 from typing import Set, Tuple
 from src.state import GameState
@@ -18,9 +19,11 @@ class GameRules:
             UP = "UP"
             JUMP_UP = "JUMP_UP"
             RIGHT = "RIGHT"
+            JUMP_RIGHT = "JUMP_RIGHT"
             DOWN = "DOWN"
             JUMP_DOWN = "JUMP_DOWN"
             LEFT = "LEFT"
+            JUMP_LEFT = "JUMP_LEFT"
             NE = "NE"
             SE = "SE"
             SW = "SW"
@@ -29,25 +32,49 @@ class GameRules:
         class SystemType(Enum):
             RELATIVE = "RELATIVE"
             ABSOLUTE = "ABSOLUTE"
-            
-        def __init__(self, system: SystemType, movement: MovementType = None, position: GameState.Position = None):
+
+        def __init__(
+            self,
+            system: SystemType,
+            movement: MovementType | None = None,
+            position: GameState.Position | None = None,
+        ):
             self.system = system
+
             if system == self.SystemType.RELATIVE:
+                if movement is None:
+                    raise ValueError("RELATIVE move requires movement")
                 self.movement = movement
+                self.position = None
             else:
+                if position is None:
+                    raise ValueError("ABSOLUTE move requires position")
                 self.position = position
+                self.movement = None
 
         def __str__(self):
             if self.system == self.SystemType.ABSOLUTE:
                 return f"Move to {self.position}"
-            else:
-                return f"Move {str.lower(self.movement.value)}"
-            
+            return f"Move {self.movement.value.lower()}"
+
         def __eq__(self, other):
-            return self.system == other.system and (self.movement == other.movement or self.position == other.position)
-        
+            if not isinstance(other, GameRules.PawnMove):
+                return NotImplemented
+
+            if self.system != other.system:
+                return False
+
+            if self.system == self.SystemType.RELATIVE:
+                return self.movement == other.movement
+            else:
+                return self.position == other.position
+
         def __hash__(self):
-            return hash((self.system, self.movement)) if self.system == self.SystemType.RELATIVE  else hash((self.system, self.position))
+            if self.system == self.SystemType.RELATIVE:
+                return hash((self.system, self.movement))
+            else:
+                return hash((self.system, self.position))
+
     
     """
     Placement of a wall (vertical or horizontal).
@@ -60,6 +87,12 @@ class GameRules:
 
         def __str__(self):
             return f"Place {str.lower(self.wall.value)} wall at {self.position}"               
+        
+        def __eq__(self, value):
+            return self.position == value.position and self.wall == value.wall
+        
+        def __hash__(self):
+            return hash((self.position, self.wall))
 
 
     def __init__(self, game_state: GameStateBiased):
@@ -177,12 +210,15 @@ class GameRules:
         oppnent_can_move_right = self._can_move_right(opponent_player)
         oppnent_can_move_up    = self._can_move_up(opponent_player)
 
-        if same_x and oppnentIsAbove and jump_up_blocked: 
+        no_Hwall_between_players = not self.game_state.horizontal_edges[current_player.y-1][current_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[opponent_player.y][opponent_player.x - 1]
+
+        if same_x and oppnentIsAbove and no_Hwall_between_players and jump_up_blocked: 
             if oppnent_can_move_right: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsRight and jump_right_blocked:
+        elif same_y and opponentIsRight and no_Vwall_between_players and jump_right_blocked:
             if oppnent_can_move_up:
                 return True
             else: 
@@ -204,13 +240,16 @@ class GameRules:
         oppnent_can_move_left = self._can_move_left(opponent_player)
         oppnent_can_move_down = self._can_move_down(opponent_player)
 
-        if same_x and oppnentIsAbove and jump_up_blocked:
-            
+        no_Hwall_between_players = not self.game_state.horizontal_edges[current_player.y-1][current_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[opponent_player.y][opponent_player.x]
+
+        if same_x and oppnentIsAbove and no_Hwall_between_players and jump_up_blocked:
             if oppnent_can_move_left: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsLeft and jump_left_blocked:
+            
+        elif same_y and opponentIsLeft and no_Vwall_between_players and jump_left_blocked:
             if oppnent_can_move_down:
                 return True
             else:
@@ -232,13 +271,16 @@ class GameRules:
         oppnent_can_move_down = self._can_move_down(opponent_player)
         oppnent_can_move_right = self._can_move_right(opponent_player)
 
-        if same_x and oppnentIsBelow and jump_down_blocked:
+        no_Hwall_between_players = not self.game_state.horizontal_edges[opponent_player.y-1][opponent_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[opponent_player.y][opponent_player.x-1]
+
+        if same_x and oppnentIsBelow and no_Hwall_between_players and  jump_down_blocked:
             
             if oppnent_can_move_right: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsRight and jump_right_blocked:
+        elif same_y and opponentIsRight and no_Vwall_between_players and jump_right_blocked:
             if oppnent_can_move_down:
                 return True
             else:
@@ -261,13 +303,16 @@ class GameRules:
         oppnent_can_move_down = self._can_move_down(opponent_player)
         oppnent_can_move_left = self._can_move_left(opponent_player)
 
-        if same_x and oppnentIsBelow and jump_down_blocked:
+        no_Hwall_between_players = not self.game_state.horizontal_edges[opponent_player.y-1][opponent_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[current_player.y][current_player.x-1]
+
+        if same_x and oppnentIsBelow and no_Hwall_between_players and jump_down_blocked:
             
             if oppnent_can_move_left: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsLeft and jump_left_blocked:
+        elif same_y and opponentIsLeft and no_Vwall_between_players and jump_left_blocked:
             if oppnent_can_move_down:
                 return True
             else:
@@ -293,22 +338,35 @@ class GameRules:
 
         position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
 
-        return self._can_handler(movement, position)
+        return self.can_handler(movement, position)
 
     def can_apply_wall_move(self, player: GameState.Player, wall_move: WallMove) -> bool:
+        # putting it above causes circular import error
+        from src.helpers.path_solver import PathSolver
+        """
+        Make sure the state is updated with the correct player 1 position and player 2 position.
+        """
         # Check if player has remaining walls
-        # TODO: implement this
-        return True
+        if player == GameState.Player.PLAYER_ONE and self.game_state.player_one_remaining_walls < 1:
+            return False
+        
+        if player == GameState.Player.PLAYER_TWO and self.game_state.player_two_remaining_walls < 1:
+            return False
+        
         wall, position = wall_move.wall, wall_move.position
+        temp_state = copy.copy(self.game_state)
         try:
-            self.game_state.place_wall(wall, position)
-            return True
+            temp_state.place_wall(wall, position)
         except ValueError:
             return False
         
         # BFS or DFS to check if both players have a path to their goal
         # Use helper function
-        raise NotImplementedError("Pathfinding check not implemented yet")
+        if      not PathSolver.solve_any(GameState.Player.PLAYER_ONE, 0, temp_state)\
+            or not PathSolver.solve_any(GameState.Player.PLAYER_TWO, 8, temp_state):
+            return False
+        
+        return True
     
     
     @staticmethod
@@ -319,7 +377,9 @@ class GameRules:
             GameRules.PawnMove.MovementType.DOWN:       (0, 1),
             GameRules.PawnMove.MovementType.JUMP_DOWN:  (0, 2),
             GameRules.PawnMove.MovementType.LEFT:       (-1, 0),
+            GameRules.PawnMove.MovementType.JUMP_LEFT:  (-2, 0),
             GameRules.PawnMove.MovementType.RIGHT:      (1, 0),
+            GameRules.PawnMove.MovementType.JUMP_RIGHT: (2, 0),
             GameRules.PawnMove.MovementType.NE:         (1, -1),
             GameRules.PawnMove.MovementType.SE:         (1, 1),
             GameRules.PawnMove.MovementType.SW:         (-1, 1),
@@ -351,16 +411,18 @@ class GameRules:
             GameRules.PawnMove.MovementType.UP:         self._can_move_up,
             GameRules.PawnMove.MovementType.JUMP_UP:    self._can_jump_up,
             GameRules.PawnMove.MovementType.RIGHT:      self._can_move_right,
+            GameRules.PawnMove.MovementType.JUMP_RIGHT: self._can_jump_right,
             GameRules.PawnMove.MovementType.DOWN:       self._can_move_down,
             GameRules.PawnMove.MovementType.JUMP_DOWN:  self._can_jump_down,
             GameRules.PawnMove.MovementType.LEFT:       self._can_move_left,
+            GameRules.PawnMove.MovementType.JUMP_LEFT:  self._can_jump_left,
             GameRules.PawnMove.MovementType.NE:         self._can_move_ne,
             GameRules.PawnMove.MovementType.SE:         self._can_move_se,
             GameRules.PawnMove.MovementType.SW:         self._can_move_sw,
             GameRules.PawnMove.MovementType.NW:         self._can_move_nw,
         }
 
-    def _can_handler(self, movement, position):
+    def can_handler(self, movement, position):
         handlers = self._movement_to_handler_dict()
 
         if movement in handlers:
@@ -370,6 +432,10 @@ class GameRules:
     
     def all_pawn_moves_relative(self, player: GameState.Player) -> Set[PawnMove]:
         position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+
+        if position == self.game_state.opponent:
+            raise ValueError("This GameRules is biased against this player, can not determine legal moves")
+        
         valid_moves = set()
 
         for move_type, handler in self._movement_to_handler_dict().items():
@@ -379,19 +445,29 @@ class GameRules:
 
         return valid_moves
     
+    # TODO: fix.
     def all_pawn_moves_absolute(self, player: GameState.Player) -> Set[PawnMove]:
         position = self.game_state.player_one if player == GameState.Player.PLAYER_ONE else self.game_state.player_two
+
+        if position == self.game_state.opponent:
+            raise ValueError("This GameRules is biased against this player, can not determine legal moves")
+        
         valid_moves = set()
 
         for move_type, handler in self._movement_to_handler_dict().items():
             if handler(position):
-                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.ABSOLUTE, position=(position + self.movement_to_delta(move_type)))
+                t = position + self.movement_to_delta(move_type)
+                new_move = GameRules.PawnMove(system=GameRules.PawnMove.SystemType.ABSOLUTE, position=GameState.Position(t[0], t[1]))
                 valid_moves.add(new_move)
 
         return valid_moves
     #get all pawn movies absolute using the player and current position as input
     def all_pown_moves_absolute_using_position(self,player: GameState.Player,c_position : GameState.Position) -> Set[PawnMove]:
         position = c_position
+
+        if position == self.game_state.opponent:
+            raise ValueError("This GameRules is biased against this player, can not determine legal moves")
+
         valid_moves = set()
 
         for move_type, handler in self._movement_to_handler_dict().items():
