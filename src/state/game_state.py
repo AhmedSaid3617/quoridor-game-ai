@@ -157,7 +157,7 @@ class GameStateBiased(GameState):
         super().__init__()
         self.opponent = opponent
 
-    def __eq__(self, value: GameStateBiased):
+    def __eq__(self, value):
         return  self.active_player == value.active_player and\
                 self.player_one == value.player_one and\
                 self.player_two == value.player_two and\
