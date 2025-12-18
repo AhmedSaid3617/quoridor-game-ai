@@ -41,3 +41,84 @@ class TestPath(unittest.TestCase):
         result = PathSolver.solve_all_optimum(start, 5, state)
         print (result)
 
+    def test_path_optimum_with_Player_two(self):
+        start = GameState.Player.PLAYER_TWO
+        state = self.state
+        result = PathSolver.solve_optimum(start, 5, state)
+        print(result)
+
+    def test_path_optimum_with_Edges(self):
+        start = GameState.Player.PLAYER_ONE
+        state = self.state
+        state.horizontal_edges = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0],
+        ]
+
+        result = PathSolver.solve_optimum(start, 0, state)
+        print(result)
+
+        state.vertical_edges = [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+        ]
+        result = PathSolver.solve_optimum(start, 0, state)
+        print(result)
+
+    def test_surrounded_from_three_directions(self):
+        start = GameState.Player.PLAYER_ONE
+        state = self.state
+        state.horizontal_edges = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        state.vertical_edges = [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        state.player_one = GameState.Position(4, 6)
+        result = PathSolver.solve_optimum(start, 0, state)
+        print(result)
+
+
+    #Error the path finding function ignores the other player
+
+    def test_second_player_in_front_of_the_other(self):
+        start = GameState.Player.PLAYER_ONE
+        state = self.state
+        state.player_two = GameState.Position(4, 5)
+        state.player_one = GameState.Position(4, 6)
+        result = PathSolver.solve_optimum(start, 0, state)
+        print(result)
+        start = GameState.Player.PLAYER_TWO
+        state = self.state
+        state.player_two = GameState.Position(4, 5)
+        state.player_one = GameState.Position(4, 6)
+        result = PathSolver.solve_optimum(start, 8, state)
+        print(result)

@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import copy
 from enum import Enum
 from typing import Set, Tuple
 from src.state import GameState
@@ -298,6 +299,11 @@ class GameRules:
         return self._can_handler(movement, position)
 
     def can_apply_wall_move(self, player: GameState.Player, wall_move: WallMove) -> bool:
+        # putting it above causes circular import error
+        from src.helpers.path_solver import PathSolver
+        """
+        Make sure the state is updated with the correct player 1 position and player 2 position.
+        """
         # Check if player has remaining walls
         if player == GameState.Player.PLAYER_ONE and self.game_state.player_one_remaining_walls < 1:
             return False
@@ -306,15 +312,19 @@ class GameRules:
             return False
         
         wall, position = wall_move.wall, wall_move.position
+        temp_state = copy.copy(self.game_state)
         try:
-            self.game_state.place_wall(wall, position)
-            return True
+            temp_state.place_wall(wall, position)
         except ValueError:
             return False
         
         # BFS or DFS to check if both players have a path to their goal
         # Use helper function
-        raise NotImplementedError("Pathfinding check not implemented yet")
+        if      not PathSolver.solve_any(GameState.Player.PLAYER_ONE, 0, temp_state)\
+            or not PathSolver.solve_any(GameState.Player.PLAYER_TWO, 8, temp_state):
+            return False
+        
+        return True
     
     
     @staticmethod
