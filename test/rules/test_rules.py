@@ -309,6 +309,31 @@ class TestRulesOperations(unittest.TestCase):
         gs.vertical_edges [4][5] = False
         self.assertFalse(rules._can_move_ne(gs.player_one), "Should not move ne if opponent is not directly to the right or above")
 
+        # horizonatal wall between players
+        gs.player_one = GameState.Position(1, 3)
+        gs.opponent   = GameState.Position(1, 2)
+        gs.horizontal_edges[1][1] = True
+        gs.horizontal_edges[2][1] = True
+        gs.horizontal_edges[2][0] = False
+        gs.horizontal_edges[2][2] = True
+        gs.vertical_edges  [2][1] = False
+        self.assertFalse(rules._can_move_ne(gs.player_one), "Should move not ne if wall is between the players")
+        gs.horizontal_edges[2][2] = False
+        gs.horizontal_edges[1][1] = False
+        gs.horizontal_edges[2][1] = False
+
+        # veritcal wall between players
+        gs.player_one = GameState.Position(1, 3)
+        gs.opponent   = GameState.Position(2, 3)
+        gs.vertical_edges  [3][1] = True
+        gs.vertical_edges  [3][2] = True
+        gs.horizontal_edges[2][2] = False
+        self.assertFalse(rules._can_move_ne(gs.player_one), "Should move not ne if wall is between the players")
+        gs.vertical_edges  [3][1] = False
+        gs.vertical_edges  [3][2] = False
+        gs.horizontal_edges[2][2] = False       
+
+
         # Reset
         gs.vertical_edges[4][2] = False
         gs.player_one = GameState.Position(4, 8)
@@ -344,6 +369,29 @@ class TestRulesOperations(unittest.TestCase):
         gs.opponent = GameState.Position(4,5) 
         self.assertFalse(rules._can_move_nw(gs.player_one), "Should not move nw if opponent is not directly to the left or above")
 
+        # horizonatal wall between players
+        gs.player_one = GameState.Position(1, 3)
+        gs.opponent   = GameState.Position(1, 2)
+        gs.horizontal_edges[1][1] = True
+        gs.horizontal_edges[2][1] = True
+        gs.horizontal_edges[2][0] = False
+        gs.horizontal_edges[2][2] = True
+        gs.vertical_edges  [2][1] = False
+        self.assertFalse(rules._can_move_nw(gs.player_one), "Should move not nw if wall is between the players")
+        gs.horizontal_edges[2][2] = False
+        gs.horizontal_edges[1][1] = False
+        gs.horizontal_edges[2][1] = False
+
+        # veritcal wall between players
+        gs.player_one = GameState.Position(1, 3)
+        gs.opponent   = GameState.Position(0, 3)
+        gs.vertical_edges  [3][0] = True
+        gs.vertical_edges  [3][2] = True
+        gs.horizontal_edges[3][0] = False
+        self.assertFalse(rules._can_move_nw(gs.player_one), "Should move not nw if wall is between the players")
+        gs.vertical_edges  [3][0] = False
+        gs.vertical_edges  [3][2] = False
+           
         # Reset
         gs.vertical_edges[4][2] = False
         gs.vertical_edges[5][0] = False
@@ -379,6 +427,25 @@ class TestRulesOperations(unittest.TestCase):
         gs.vertical_edges [4][5] = False
         self.assertFalse(rules._can_move_se(gs.player_one), "Should not move se if opponent is not directly to the right or below")
 
+        # horizonatal wall between players
+        gs.player_one = GameState.Position(7, 1)
+        gs.opponent   = GameState.Position(7, 2)
+        gs.horizontal_edges[1][7] = True
+        gs.horizontal_edges[2][7] = True
+        gs.vertical_edges  [2][7] = False
+        self.assertFalse(rules._can_move_se(gs.player_one), "Should move not se if wall is between the players")
+        gs.horizontal_edges[1][7] = False
+        gs.horizontal_edges[2][7] = False
+        gs.vertical_edges  [2][7] = False
+
+        # veritcal wall between players
+        gs.player_one = GameState.Position(7, 1)
+        gs.opponent   = GameState.Position(8, 1)
+        gs.vertical_edges  [1][7] = True
+        gs.horizontal_edges[1][7] = False
+        self.assertFalse(rules._can_move_se(gs.player_one), "Should move not se if wall is between the players")
+        gs.vertical_edges  [1][7] = False
+
         # Reset
         gs.player_one = GameState.Position(4, 8)
         gs.opponent = GameState.Position(4, 0)
@@ -412,6 +479,25 @@ class TestRulesOperations(unittest.TestCase):
         # opponent is not directly above or to the left
         gs.opponent = GameState.Position(4,5) 
         self.assertFalse(rules._can_move_sw(gs.player_one), "Should not move sw if opponent is not directly to the left or below")
+
+        # horizonatal wall between players
+        gs.player_one = GameState.Position(7, 1)
+        gs.opponent   = GameState.Position(7, 2)
+        gs.horizontal_edges[1][7] = True
+        gs.horizontal_edges[2][7] = True
+        gs.vertical_edges  [2][7] = False
+        self.assertFalse(rules._can_move_sw(gs.player_one), "Should move not sw if wall is between the players")
+        gs.horizontal_edges[1][7] = False
+        gs.horizontal_edges[2][7] = False
+        gs.vertical_edges  [2][7] = False
+
+        # veritcal wall between players
+        gs.player_one = GameState.Position(7, 1)
+        gs.opponent   = GameState.Position(8, 1)
+        gs.vertical_edges  [1][6] = True
+        gs.horizontal_edges[1][6] = False
+        self.assertFalse(rules._can_move_sw(gs.player_one), "Should move not sw if wall is between the players")
+        gs.vertical_edges  [1][5] = False
 
         # Reset
         gs.player_one = GameState.Position(4, 8)
