@@ -210,12 +210,15 @@ class GameRules:
         oppnent_can_move_right = self._can_move_right(opponent_player)
         oppnent_can_move_up    = self._can_move_up(opponent_player)
 
-        if same_x and oppnentIsAbove and jump_up_blocked: 
+        no_Hwall_between_players = not self.game_state.horizontal_edges[current_player.y-1][current_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[opponent_player.y][opponent_player.x - 1]
+
+        if same_x and oppnentIsAbove and no_Hwall_between_players and jump_up_blocked: 
             if oppnent_can_move_right: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsRight and jump_right_blocked:
+        elif same_y and opponentIsRight and no_Vwall_between_players and jump_right_blocked:
             if oppnent_can_move_up:
                 return True
             else: 
@@ -237,13 +240,16 @@ class GameRules:
         oppnent_can_move_left = self._can_move_left(opponent_player)
         oppnent_can_move_down = self._can_move_down(opponent_player)
 
-        if same_x and oppnentIsAbove and jump_up_blocked:
-            
+        no_Hwall_between_players = not self.game_state.horizontal_edges[current_player.y-1][current_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[opponent_player.y][opponent_player.x]
+
+        if same_x and oppnentIsAbove and no_Hwall_between_players and jump_up_blocked:
             if oppnent_can_move_left: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsLeft and jump_left_blocked:
+            
+        elif same_y and opponentIsLeft and no_Vwall_between_players and jump_left_blocked:
             if oppnent_can_move_down:
                 return True
             else:
@@ -265,13 +271,16 @@ class GameRules:
         oppnent_can_move_down = self._can_move_down(opponent_player)
         oppnent_can_move_right = self._can_move_right(opponent_player)
 
-        if same_x and oppnentIsBelow and jump_down_blocked:
+        no_Hwall_between_players = not self.game_state.horizontal_edges[opponent_player.y-1][opponent_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[opponent_player.y][opponent_player.x-1]
+
+        if same_x and oppnentIsBelow and no_Hwall_between_players and  jump_down_blocked:
             
             if oppnent_can_move_right: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsRight and jump_right_blocked:
+        elif same_y and opponentIsRight and no_Vwall_between_players and jump_right_blocked:
             if oppnent_can_move_down:
                 return True
             else:
@@ -294,13 +303,16 @@ class GameRules:
         oppnent_can_move_down = self._can_move_down(opponent_player)
         oppnent_can_move_left = self._can_move_left(opponent_player)
 
-        if same_x and oppnentIsBelow and jump_down_blocked:
+        no_Hwall_between_players = not self.game_state.horizontal_edges[opponent_player.y-1][opponent_player.x]
+        no_Vwall_between_players = not self.game_state.vertical_edges[current_player.y][current_player.x-1]
+
+        if same_x and oppnentIsBelow and no_Hwall_between_players and jump_down_blocked:
             
             if oppnent_can_move_left: 
                 return True
             else:
                 return False
-        elif same_y and opponentIsLeft and jump_left_blocked:
+        elif same_y and opponentIsLeft and no_Vwall_between_players and jump_left_blocked:
             if oppnent_can_move_down:
                 return True
             else:
