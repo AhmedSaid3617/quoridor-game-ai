@@ -17,5 +17,5 @@ class TestAgent(unittest.TestCase):
 
     # --- Test Methods (Must start with 'test_') ---
     def test_create_instance_and_predicts_a_move(self):
-        agent = Agent_leveled(difficulty=Agent.AgentDifficulty.HARD, state=self.state, player=GameState.Player.PLAYER_TWO)
+        agent = Agent_leveled(difficulty=Agent.AgentDifficulty.EASY, state=self.state, player=GameState.Player.PLAYER_TWO)
         self.assertIsInstance(agent.decide_move(), GameRules.Move)

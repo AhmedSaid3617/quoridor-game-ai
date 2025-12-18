@@ -21,5 +21,5 @@ class TestWallBlockSolver(unittest.TestCase):
     def test_wall_block(self):
         solver = WallBlockSolver(self.state, GameState.Player.PLAYER_ONE)
         solution = solver.solve(GameState.Position(0,0), GameRules.PawnMove(GameRules.PawnMove.SystemType.RELATIVE, GameRules.PawnMove.MovementType.RIGHT))
-        self.assertEqual(solution, GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0)))
+        self.assertEqual(solution, [GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(0,0))])
 
