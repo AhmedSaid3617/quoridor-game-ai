@@ -141,7 +141,7 @@ class GameState:
         new_state.active_player = self.active_player
         return new_state
     
-    def __eq__(self, value: GameState):
+    def __eq__(self, value):
         return  self.active_player == value.active_player and\
                 self.player_one == value.player_one and\
                 self.player_two == value.player_two and\
