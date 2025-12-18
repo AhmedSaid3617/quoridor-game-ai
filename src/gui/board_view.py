@@ -95,7 +95,7 @@ class BoardWidget(QWidget):
                 self.paint_wall(painter, row, col, self.current_wall_orientation, cell_size)
 
             # --- Legal moves
-            rules_1 = GameRules(self.game_state.get_biased_for_player(GameState.Player.PLAYER_ONE if self.game_state.active_player == GameState.Player.PLAYER_TWO else GameState.Player.PLAYER_TWO))
+            rules_1 = GameRules(self.game_state.get_biased_for_player(self.game_state.active_player))
             self.legal_moves = rules_1.all_pawn_moves_absolute(self.game_state.active_player)
             if self.game_state.active_player == GameState.Player.PLAYER_ONE:
                 painter.setBrush(QColor(200, 0, 0, 100))  # red

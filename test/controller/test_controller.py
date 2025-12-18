@@ -10,7 +10,7 @@ class TestGameController(unittest.TestCase):
     def setUp(self):
         """Set up a fresh game state and controller before each test."""
         self.game_state = GameState()
-        self.controller = GameController(self.game_state, GameState.Player.PLAYER_ONE)
+        self.controller = GameController(self.game_state)
 
     def tearDown(self):
         """Clean up after each test."""
@@ -21,15 +21,14 @@ class TestGameController(unittest.TestCase):
 
     def test_initialization_player_one_starts(self):
         """Test that controller initializes correctly with Player One starting."""
-        controller = GameController(GameState(), GameState.Player.PLAYER_ONE)
-        self.assertEqual(controller.current_player, GameState.Player.PLAYER_ONE)
+        controller = GameController(GameState())
         self.assertEqual(controller.game_state.active_player, GameState.Player.PLAYER_ONE)
 
     def test_initialization_player_two_starts(self):
         """Test that controller initializes correctly with Player Two starting."""
-        game_state = GameState()
-        controller = GameController(game_state, GameState.Player.PLAYER_TWO)
-        self.assertEqual(controller.current_player, GameState.Player.PLAYER_TWO)
+        game_state = GameState(starting_player=GameState.Player.PLAYER_TWO)
+        controller = GameController(game_state)
+        self.assertEqual(controller.game_state.active_player, GameState.Player.PLAYER_TWO)
 
     # --- Check Winner Tests ---
 

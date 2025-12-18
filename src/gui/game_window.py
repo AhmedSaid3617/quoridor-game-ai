@@ -109,7 +109,7 @@ class GameWindow(QMainWindow):
 
         #game_state_init_test(self.game_state)
 
-        self.controller = GameController(self.game_state, GameState.Player.PLAYER_ONE)
+        self.controller = GameController(self.game_state)
         
         # TODO: do i need this?
         self.game_started = True

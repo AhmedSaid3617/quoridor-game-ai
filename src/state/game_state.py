@@ -37,12 +37,12 @@ class GameState:
         HORIZONTAL = "HORIZONTAL"
 
 
-    def __init__(self):
+    def __init__(self, starting_player: Player = Player.PLAYER_ONE):
         self.player_one = self.Position(4,8)
         self.player_two = self.Position(4,0)
         self.player_one_remaining_walls = 10
         self.player_two_remaining_walls = 10
-        self.active_player = self.Player.PLAYER_ONE
+        self.active_player = starting_player
 
         # vertical_edges[x][y] indicates if there is a vertical wall to the right of (x, y)
         self.vertical_edges = [[False] * 8 for _ in range(9)]
@@ -104,8 +104,21 @@ class GameState:
         new_state.horizontal_edges = [row[:] for row in self.horizontal_edges]
         return new_state
     
-    def get_biased_for_player(self, opponent: Player):
-        new_state = GameStateBiased(self.player_one if opponent == GameState.Player.PLAYER_TWO else self.player_two)
+    def get_biased_for_player(self, player: Player):
+        """
+        Returns a biased copy of the game state for the specified player.
+
+        This method creates a new `GameStateBiased` object that represents the game state
+        from the perspective of the given player. It copies the relevant player objects and
+        the current state of the vertical and horizontal edges.
+
+        Args:
+            player (Player): The player for whom the biased state should be generated.
+
+        Returns:
+            GameStateBiased: A new game state object biased for the specified player.
+        """
+        new_state = GameStateBiased(opponent=self.player_one if player == GameState.Player.PLAYER_TWO else self.player_two)
         new_state.player_one = self.player_one
         new_state.player_two = self.player_two.__copy__()
         new_state.vertical_edges = [row[:] for row in self.vertical_edges]
