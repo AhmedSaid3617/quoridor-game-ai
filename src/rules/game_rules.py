@@ -299,8 +299,12 @@ class GameRules:
 
     def can_apply_wall_move(self, player: GameState.Player, wall_move: WallMove) -> bool:
         # Check if player has remaining walls
-        # TODO: implement this
-        return True
+        if player == GameState.Player.PLAYER_ONE and self.game_state.player_one_remaining_walls < 1:
+            return False
+        
+        if player == GameState.Player.PLAYER_TWO and self.game_state.player_two_remaining_walls < 1:
+            return False
+        
         wall, position = wall_move.wall, wall_move.position
         try:
             self.game_state.place_wall(wall, position)
