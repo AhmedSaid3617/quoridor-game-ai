@@ -38,29 +38,31 @@ class TestGameController(unittest.TestCase):
 
     def test_check_winner_player_one_wins(self):
         """Test that Player One wins when reaching y=0."""
-        self.game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(4, 0))
+        self.game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(2, 0))
         winner = self.controller.check_winner()
         self.assertEqual(winner, GameState.Player.PLAYER_ONE)
 
     def test_check_winner_player_two_wins(self):
         """Test that Player Two wins when reaching y=8."""
-        self.game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(4, 8))
+        self.game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(2, 8))
         winner = self.controller.check_winner()
         self.assertEqual(winner, GameState.Player.PLAYER_TWO)
 
     def test_check_winner_player_one_any_column(self):
         """Test that Player One wins at y=0 regardless of x position."""
         for x in range(9):
-            game_state = GameState()
-            controller = GameController(game_state, GameState.Player.PLAYER_ONE)
+            game_state = GameState(GameState.Player.PLAYER_ONE)
+            game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(1, 1)) # place player one away
+            controller = GameController(game_state)
             game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(x, 0))
             self.assertEqual(controller.check_winner(), GameState.Player.PLAYER_ONE)
 
     def test_check_winner_player_two_any_column(self):
         """Test that Player Two wins at y=8 regardless of x position."""
         for x in range(9):
-            game_state = GameState()
-            controller = GameController(game_state, GameState.Player.PLAYER_TWO)
+            game_state = GameState(GameState.Player.PLAYER_TWO)
+            game_state.place_player(GameState.Player.PLAYER_ONE, GameState.Position(1, 1)) # place player one away
+            controller = GameController(game_state)
             game_state.place_player(GameState.Player.PLAYER_TWO, GameState.Position(x, 8))
             self.assertEqual(controller.check_winner(), GameState.Player.PLAYER_TWO)
 
