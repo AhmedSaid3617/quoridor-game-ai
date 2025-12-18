@@ -235,6 +235,8 @@ class TestStateOperations(unittest.TestCase):
 
         copied_state = self.state.__copy__()
 
+        self.assertEqual(copied_state, self.state)
+
         self.assertEqual(copied_state.player_one, self.state.player_one)
         self.assertEqual(copied_state.player_two, self.state.player_two)
         self.assertEqual(copied_state.vertical_edges, self.state.vertical_edges)
