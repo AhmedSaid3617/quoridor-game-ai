@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QComboBox, QFrame, QSizePolicy
 )
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QCloseEvent, QColor
 from PyQt6.QtCore import Qt
 from src.agent.agent_leveled import Agent_leveled
 from src.gui.board_view import BoardWidget
@@ -11,6 +11,7 @@ from src.controller.game_controller import GameController
 from src.state.game_state import GameState
 from src.agent.agent import Agent
 from src.agent.mock_agent import MockAgent
+import os
 
 class GameWindow(QMainWindow):
 
@@ -203,5 +204,7 @@ class GameWindow(QMainWindow):
                 self.board.update()  # Refresh the board view
             except IndexError:
                 pass  # No more moves to redo
-    
+
+    def closeEvent(self, a0: QCloseEvent | None) -> None:
+        os._exit(0)
 

@@ -8,4 +8,8 @@ if __name__ == "__main__":
     game_board_state = GameState()  # Initialize your GameState here
     window = GameWindow()
     window.show()
+    
+    if window.board.executor:
+        window.board.executor.shutdown()
+
     sys.exit(app.exec())
