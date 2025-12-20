@@ -10,6 +10,8 @@ from src.rules.game_rules import GameRules
 from src.state.game_state import GameState
 from src.agent.agent import Agent
 
+import concurrent.futures
+
 BOARD_SIZE = 9
 
 class BoardWidget(QWidget):
@@ -40,6 +42,8 @@ class BoardWidget(QWidget):
         self.game_state = GameState()
         self.controller = None
         self.game_mode = None
+        self.ai_playing = False
+        self.executor = None
 
     def start_game(self, game_state: GameState, controller: GameController, mode, agent: Agent = None):
         self.game_state = game_state
@@ -170,7 +174,7 @@ class BoardWidget(QWidget):
     def mousePressEvent(self, a0):
         pass
         
-        if self.controller is None:
+        if self.controller is None or self.ai_playing:
             return
         
         x = a0.position().x()
@@ -194,31 +198,52 @@ class BoardWidget(QWidget):
         self.update()
 
 
-    def apply_move(self, pawn_move):
-        self.controller.apply_move(pawn_move)
+    def apply_move(self, player_move):
 
+        if self.controller: # The game is on.
+            self.controller.apply_move(player_move) # Try the player's move.
+            self.update() # Update the board.
+            self.game_state_changed.emit()
+
+            winner = self.controller.check_winner() # If someone won then end the game.
+            if winner:
+                color = ""
+                if winner == GameState.Player.PLAYER_ONE:
+                    color = "Red"
+                else:
+                    color = "Blue"
+                
+                self.show_message(f"{color} wins!", 3000)
+                self.controller = None
+                self.game_state_changed.emit()
+                return
+            
+
+            # In case of AI mode, let the AI play.
+            if self.game_mode == "AI" and self.game_state.active_player == GameState.Player.PLAYER_TWO:
+                # Let AI make its move
+                # Signal that the ai is playing to lock the controller.
+                self.ai_playing = True
+                self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+                future = self.executor.submit(self.ai_agent.decide_move)
+                future.add_done_callback(lambda f: self._handle_ai_play(future.result()))
+
+                #ai_move = self.ai_agent.decide_move()
+                #self._ai_done_callback(ai_move)
+
+    def _handle_ai_play(self, ai_move):
+        self.controller.apply_move(ai_move)
+        self.update()
+
+                # If the AI won, end the game.
         if self.controller and self.controller.check_winner() is not None:
             winner = self.controller.check_winner()
             color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
             self.show_message(f"{color} wins!", 3000)
             self.controller = None
 
-            self.game_state_changed.emit()
-            self.update()
-            return
-
-        if self.game_mode == "AI" and self.game_state.active_player == GameState.Player.PLAYER_TWO:
-            # Let AI make its move
-            ai_move = self.ai_agent.decide_move()
-            self.controller.apply_move(ai_move)
-
-            if self.controller and self.controller.check_winner() is not None:
-                winner = self.controller.check_winner()
-                color = "Red" if winner == GameState.Player.PLAYER_ONE else "Blue"
-                self.show_message(f"{color} wins!", 3000)
-                self.controller = None
-
-            self.game_state_changed.emit()
+        self.ai_playing = False
+        self.game_state_changed.emit()
 
 
     def show_message(self, text, duration=1000):
