@@ -19,7 +19,11 @@ class Agent_leveled(Agent):
         remaining_walls = state.player_one_remaining_walls if self.player == GameState.Player.PLAYER_ONE else state.player_two_remaining_walls
         remaining_walls_opponent = state.player_one_remaining_walls if opponent == GameState.Player.PLAYER_ONE else state.player_two_remaining_walls
 
-        return len_opp - 1.2 * len_agent - 0.2 * (remaining_walls_opponent - remaining_walls)
+        biased_path_heuristic = 0.7 * len_opp - len_agent
+        if biased_path_heuristic < 0:
+            return biased_path_heuristic * 2 # loosing
+        else:
+            return biased_path_heuristic - 0.4 * (remaining_walls_opponent - remaining_walls)
     
 
     def minimax(self, state: GameState, depth: int, alpha: int, beta: int) -> int:
@@ -39,7 +43,7 @@ class Agent_leveled(Agent):
             rules=GameRules(state.get_biased_for_player(self.player))
             wall_solver=WallBlockSolver(state,self.player)
             available_pawn_moves=list(rules.all_pawn_moves_absolute(self.player))
-            available_walls_on_path= wall_solver.get_wall_moves_on_opponent_opt_paths()
+            available_walls_on_path= self.select_middle_k(wall_solver.get_wall_moves_on_opponent_opt_paths(), 5)
             dfs=available_pawn_moves+available_walls_on_path
             best_value = -1000
             for move in dfs:
@@ -58,7 +62,7 @@ class Agent_leveled(Agent):
             rules=GameRules(state.get_biased_for_player(opponent))
             wall_solver=WallBlockSolver(state,opponent) 
             available_pawn_moves=list(rules.all_pawn_moves_absolute(opponent))
-            available_walls_on_path= wall_solver.get_wall_moves_on_opponent_opt_paths()
+            available_walls_on_path= self.select_middle_k(wall_solver.get_wall_moves_on_opponent_opt_paths(), 5)
             dfs=available_pawn_moves+available_walls_on_path
             worst_value = 10000
             for move in dfs:
@@ -83,7 +87,7 @@ class Agent_leveled(Agent):
         move =None
         wall_solver=WallBlockSolver(self.state,self.player) 
         available_pawn_moves=list(rules.all_pawn_moves_absolute(self.player))
-        available_walls_on_path= wall_solver.get_wall_moves_on_opponent_opt_paths()
+        available_walls_on_path= self.select_middle_k(wall_solver.get_wall_moves_on_opponent_opt_paths(), 4)
         dfs=available_pawn_moves+available_walls_on_path
         best_move=None
         for move in dfs:
@@ -95,11 +99,22 @@ class Agent_leveled(Agent):
               continue
           v = self.minimax(temp_state, depth - 1, alpha, beta)
           if alpha <= v:
-              if random.random() >= 0.5: # introduce randomness, not always take the option if similar in heuristic
+              if random.random() >= 0.5 or not best_move: # introduce randomness, not always take the option if similar in heuristic
                 alpha = v
                 best_move = move
                 
         return best_move
     
+    @staticmethod
+    def select_middle_k(items, k: int):
+        if not items or k >= len(items):
+            return items
 
+        mid = len(items) // 2
+        half = k // 2
+
+        start = max(0, mid - half)
+        end = min(len(items), start + k)
+
+        return items[start:end]
 

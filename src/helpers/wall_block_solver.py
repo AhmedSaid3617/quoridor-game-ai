@@ -159,7 +159,7 @@ class WallBlockSolver:
         raise NotImplementedError("Wall blocking check not implemented yet")
     
     def get_wall_moves_on_opponent_opt_paths(self) -> List[GameRules.WallMove]:
-        wall_moves = set()
+        wall_moves = list()
 
         if self.player == GameState.Player.PLAYER_ONE:
             paths = PathSolver.solve_all_optimum(GameState.Player.PLAYER_TWO, 8, self.game_state)
@@ -175,8 +175,8 @@ class WallBlockSolver:
                 solution = self.solve(current_position, move)
                 if isinstance(solution, list):
                     for move in solution:
-                        wall_moves.add(move)
+                        wall_moves.append(move)
 
 
-        return list(wall_moves)
+        return wall_moves
         
