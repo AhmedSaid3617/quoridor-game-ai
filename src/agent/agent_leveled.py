@@ -1,4 +1,5 @@
 import copy
+import random
 from src.agent.agent import Agent
 from src.controller.game_controller import GameController
 from src.helpers.path_solver import PathSolver
@@ -15,7 +16,10 @@ class Agent_leveled(Agent):
         len_agent = len(min_path_for_agent.path) if min_path_for_agent else 99
         len_opp = len(min_path_for_opponent.path) if min_path_for_opponent else 99
 
-        return len_opp - len_agent
+        remaining_walls = state.player_one_remaining_walls if self.player == GameState.Player.PLAYER_ONE else state.player_two_remaining_walls
+        remaining_walls_opponent = state.player_one_remaining_walls if opponent == GameState.Player.PLAYER_ONE else state.player_two_remaining_walls
+
+        return len_opp - 1.2 * len_agent - 0.2 * (remaining_walls_opponent - remaining_walls)
     
 
     def minimax(self, state: GameState, depth: int, alpha: int, beta: int) -> int:
@@ -25,9 +29,9 @@ class Agent_leveled(Agent):
         controller = GameController(state)
         if depth == 0 or controller.check_winner():
             if controller.check_winner() == self.player:
-                return self.heuristic(state)
+                return 1000 + 5 * self.heuristic(state)
             elif controller.check_winner() == opponent:
-                return self.heuristic(state)
+                return -1000 + 5 * self.heuristic(state)
             else:
                 return self.heuristic(state)
         
@@ -72,7 +76,7 @@ class Agent_leveled(Agent):
 
     def decide_move(self,current_level:int =1) -> 'GameRules.Move':
         rules=GameRules(self.state.get_biased_for_player(self.player))
-        depth = 5 if self.difficulty == Agent.AgentDifficulty.HARD else 3 if self.difficulty == Agent.AgentDifficulty.MEDIUM else 1
+        depth = 3 if self.difficulty == Agent.AgentDifficulty.HARD else 2 if self.difficulty == Agent.AgentDifficulty.MEDIUM else 1
         
         alpha=-10000
         beta=10000
@@ -91,8 +95,9 @@ class Agent_leveled(Agent):
               continue
           v = self.minimax(temp_state, depth - 1, alpha, beta)
           if alpha <= v:
-              alpha = v
-              best_move = move
+              if random.random() >= 0.5: # introduce randomness, not always take the option if similar in heuristic
+                alpha = v
+                best_move = move
                 
         return best_move
     
