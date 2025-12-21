@@ -46,7 +46,7 @@ class Agent_leveled(Agent):
             rules=GameRules(state.get_biased_for_player(self.player))
             wall_solver=WallBlockSolver(state,opponent)
             available_pawn_moves=list(rules.all_pawn_moves_absolute(self.player))
-            available_walls_on_path= wall_solver.get_wall_moves_on_opt_paths()
+            available_walls_on_path= wall_solver.get_wall_moves_on_best_path()
             dfs=available_pawn_moves+available_walls_on_path
             best_value = -self.INFINITY
             for move in dfs:
@@ -57,9 +57,10 @@ class Agent_leveled(Agent):
                     continue
                 value = self.minimax(game_controller.game_state, depth - 1, alpha, beta)
                 best_value = max(best_value, value)
-                """ alpha = max(alpha, best_value)
-                if beta <= alpha:
-                    break """
+                
+                if value >= beta:
+                    break
+                alpha = max(alpha, best_value)
             return best_value
         
         # MIN
@@ -67,7 +68,7 @@ class Agent_leveled(Agent):
             rules=GameRules(state.get_biased_for_player(opponent))
             wall_solver=WallBlockSolver(state,self.player) 
             available_pawn_moves=list(rules.all_pawn_moves_absolute(opponent))
-            available_walls_on_path= wall_solver.get_wall_moves_on_opt_paths()
+            available_walls_on_path= wall_solver.get_wall_moves_on_best_path()
             dfs=available_pawn_moves+available_walls_on_path
             worst_value = self.INFINITY
             for move in dfs:
@@ -78,21 +79,22 @@ class Agent_leveled(Agent):
                     continue
                 value = self.minimax(game_controller.game_state, depth - 1, alpha, beta)
                 worst_value = min(worst_value, value)
-                """ beta = min(beta, worst_value)
-                if beta <= alpha:
-                    break """
+                
+                if value <= alpha:
+                    break
+                beta = min(beta, worst_value)
             return worst_value
 
     def decide_move(self,current_level:int =1) -> 'GameRules.Move':
         rules=GameRules(self.state.get_biased_for_player(self.player))
         depth = 3 if self.difficulty == Agent.AgentDifficulty.HARD else 2 if self.difficulty == Agent.AgentDifficulty.MEDIUM else 1
         opponent =GameState.Player.PLAYER_TWO if self.player==GameState.Player.PLAYER_ONE else GameState.Player.PLAYER_ONE
-        alpha=-10000
-        beta=10000
+        alpha=-self.INFINITY
+        beta=self.INFINITY
         move =None
         wall_solver=WallBlockSolver(self.state, opponent) 
         available_pawn_moves=list(rules.all_pawn_moves_absolute(self.player))
-        available_walls_on_path= wall_solver.get_wall_moves_on_opt_paths()
+        available_walls_on_path= wall_solver.get_wall_moves_on_best_path()
         dfs=available_pawn_moves+available_walls_on_path
         best_move=dfs[0]
         for move in dfs:

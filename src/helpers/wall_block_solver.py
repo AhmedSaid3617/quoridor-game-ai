@@ -180,4 +180,28 @@ class WallBlockSolver:
 
 
         return list(wall_moves)
+    
+    def get_wall_moves_on_best_path(self):
+
+        wall_moves = set()
+
+        if self.player == GameState.Player.PLAYER_ONE:
+            path = PathSolver.solve_optimum(GameState.Player.PLAYER_ONE, 0, self.game_state)
+        else:
+            path = PathSolver.solve_optimum(GameState.Player.PLAYER_TWO, 8, self.game_state)
+        
+        
+        current_position = path.start
+        for move in path.path: # path is relative
+
+            solution = self.solve(current_position, move)
+            if isinstance(solution, list):
+                for m in solution:
+                    wall_moves.add(m)
+            
+            t = current_position + GameRules.movement_to_delta(move.movement)
+            current_position = GameState.Position(t[0], t[1])
+
+
+        return list(wall_moves)
         
