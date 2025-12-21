@@ -20,6 +20,8 @@ header-includes:
 
 The game offers both Human vs Human and Human vs AI modes, with three difficulty levels that provide progressively challenging gameplay. The AI agent uses pathfinding algorithms and strategic evaluation to create a competitive and engaging opponent.
 
+**GitHub Repository**: [https://github.com/AhmedSaid3617/quoridor-game-ai](https://github.com/AhmedSaid3617/quoridor-game-ai)
+
 \newpage
 
 # 1. Introduction to Quoridor
