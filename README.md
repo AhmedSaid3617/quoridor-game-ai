@@ -83,6 +83,9 @@ python main.py
 
 <img src="assets/images/image-3.png" alt="Diagonal move" width="500"/>
 
+### **AI Playing**
+<img src="assets/images/image-6.png" alt="Jump move" width="500"/>
+
 ---
 
 ## Demo Video
