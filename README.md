@@ -83,10 +83,6 @@ python main.py
 
 <img src="assets/images/image-3.png" alt="Diagonal move" width="500"/>
 
-### **Move Validation**
-
-<img src="assets/images/image-4.png" alt="Illegal move detection" width="500"/>
-
 ---
 
 ## Demo Video
@@ -126,11 +122,3 @@ quoridor-game-ai/
 ## Documentation
 
 For detailed information including AI algorithm explanation, design decisions, and implementation challenges, see [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md).
-
-## Authors
-
-Ahmed Said - [AhmedSaid3617](https://github.com/AhmedSaid3617)
-
-## License
-
-MIT License
