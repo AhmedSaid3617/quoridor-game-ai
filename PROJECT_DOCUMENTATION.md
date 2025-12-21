@@ -1,6 +1,6 @@
 ---
 title: "Quoridor Arena: AI-Powered Strategy Board Game"
-author: "Your Name"
+author: "Team 28"
 date: "December 2025"
 geometry: margin=1in
 header-includes:
