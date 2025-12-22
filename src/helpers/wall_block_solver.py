@@ -30,7 +30,7 @@ class WallBlockSolver:
             if rules.can_apply_wall_move(self.player, wall_move):
                 wall_moves.add(wall_move)
             
-            wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y - 1))
+            wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x - 1, position.y - 1))
             if rules.can_apply_wall_move(self.player, wall_move):
                 wall_moves.add(wall_move)
   
@@ -42,7 +42,7 @@ class WallBlockSolver:
             if rules.can_apply_wall_move(self.player, wall_move):
                 wall_moves.add(wall_move)
             
-            wall_move = GameRules.WallMove(GameState.Wall.VERTICAL, GameState.Position(position.x - 1, position.y - 2))
+            wall_move = GameRules.WallMove(GameState.Wall.HORIZONTAL, GameState.Position(position.x - 1, position.y - 2))
             if rules.can_apply_wall_move(self.player, wall_move):
                 wall_moves.add(wall_move)
             
