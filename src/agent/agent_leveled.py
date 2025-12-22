@@ -131,23 +131,6 @@ class Agent_leveled(Agent):
         else:
             dfs=available_walls_on_path+available_pawn_moves
 
-        """
-        best_value = -self.INFINITY
-            for move in dfs:
-                temp_state = copy.copy(state)
-                temp_state.active_player = self.player
-                game_controller=GameController(temp_state)
-                if not game_controller.apply_move(move):
-                    continue
-                value = self.minimax(game_controller.game_state, depth - 1, alpha, beta, maximizer= not maximizer)
-                best_value = max(best_value, value)
-                
-                if value >= beta:
-                    break
-                alpha = max(alpha, best_value)
-            return best_value
-        """
-
         best_move=dfs[0]
         best_value = -self.INFINITY
         for move in dfs:
