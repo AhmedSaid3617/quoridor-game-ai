@@ -166,7 +166,9 @@ class GameRules:
     def _can_jump_up(self, position: GameState.Position) -> bool:
         current_player, opponent_player = self._get_current_and_opponent_positions(position)
 
-        if (opponent_player.x == current_player.x)and(opponent_player.y == current_player.y - 1) and (self._can_move_up(opponent_player)):  
+        if (opponent_player.x == current_player.x) and (opponent_player.y == current_player.y - 1)\
+                and (self._can_move_up(opponent_player))\
+                and not self.game_state.horizontal_edges[current_player.y - 1][current_player.x]:  
             return True
         else:
             return False
@@ -174,7 +176,9 @@ class GameRules:
     def _can_jump_down(self, position: GameState.Position) -> bool:
         current_player, opponent_player = self._get_current_and_opponent_positions(position)
 
-        if(opponent_player.x == current_player.x) and (opponent_player.y == current_player.y + 1) and (self._can_move_down(opponent_player)):  
+        if(opponent_player.x == current_player.x) and (opponent_player.y == current_player.y + 1)\
+                and (self._can_move_down(opponent_player))\
+                and not self.game_state.horizontal_edges[current_player.y][current_player.x]:  
             return True
         else:
             return False
@@ -182,7 +186,9 @@ class GameRules:
     def _can_jump_right(self, position: GameState.Position) -> bool:
         current_player, opponent_player = self._get_current_and_opponent_positions(position)
 
-        if (opponent_player.y == current_player.y) and(opponent_player.x == current_player.x + 1) and (self._can_move_right(opponent_player)):  
+        if (opponent_player.y == current_player.y) and(opponent_player.x == current_player.x + 1)\
+                and (self._can_move_right(opponent_player))\
+                and not self.game_state.vertical_edges[current_player.y][current_player.x]:  
             return True
         else:
             return False
@@ -190,7 +196,9 @@ class GameRules:
     def _can_jump_left(self, position: GameState.Position) -> bool:
         current_player, opponent_player = self._get_current_and_opponent_positions(position)
 
-        if (opponent_player.y == current_player.y) and(opponent_player.x == current_player.x - 1) and (self._can_move_left(opponent_player)):  
+        if (opponent_player.y == current_player.y) and(opponent_player.x == current_player.x - 1)\
+                and (self._can_move_left(opponent_player))\
+                and not self.game_state.vertical_edges[current_player.y][current_player.x - 1]:  
             return True
         else:
             return False
