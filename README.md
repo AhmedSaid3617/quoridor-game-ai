@@ -81,8 +81,6 @@ python main.py
 
 <img src="assets/images/image-2.png" alt="Jump move" width="500"/>
 
-<img src="assets/images/image-3.png" alt="Diagonal move" width="500"/>
-
 ### **AI Playing**
 <img src="assets/images/image-6.png" alt="Jump move" width="500"/>
 
@@ -90,7 +88,7 @@ python main.py
 
 ## Demo Video
 
-🎥 **[Watch Demo Video Here](#)**
+🎥 **[Watch Demo Video Here](https://drive.google.com/file/d/1jbGrk_jSt2dnmqf7dyKslxVSPPrbkIv2/view?usp=sharing)**
 
 *Replace with your actual demo video link showing gameplay, AI opponent, and key features*
 

@@ -9,7 +9,6 @@ header-includes:
   - \fancyhead[L]{Quoridor Arena}
   - \fancyhead[R]{AI Project Documentation}
 ---
-
 \newpage
 \tableofcontents
 \newpage
@@ -21,6 +20,8 @@ header-includes:
 The game offers both Human vs Human and Human vs AI modes, with three difficulty levels that provide progressively challenging gameplay. The AI agent uses pathfinding algorithms and strategic evaluation to create a competitive and engaging opponent.
 
 **GitHub Repository**: [https://github.com/AhmedSaid3617/quoridor-game-ai](https://github.com/AhmedSaid3617/quoridor-game-ai)
+
+**Demo Video**: [Google Drive Link](https://drive.google.com/file/d/1jbGrk_jSt2dnmqf7dyKslxVSPPrbkIv2/view?usp=sharing)
 
 \newpage
 
