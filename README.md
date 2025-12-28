@@ -90,8 +90,6 @@ python main.py
 
 🎥 **[Watch Demo Video Here](https://drive.google.com/file/d/1jbGrk_jSt2dnmqf7dyKslxVSPPrbkIv2/view?usp=sharing)**
 
-*Replace with your actual demo video link showing gameplay, AI opponent, and key features*
-
 ---
 
 ## Project Structure
